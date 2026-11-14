@@ -90,6 +90,47 @@ input.url{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line)
 label.l{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 .act{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 .err{color:var(--bad);font-size:13px;min-height:1.4em}
+
+/* ===== 開場動畫 ===== */
+#intro{position:fixed;inset:0;z-index:999;overflow:hidden;color:var(--ink);font-family:var(--font-body);cursor:pointer}
+#intro[hidden]{display:none}
+#intro .half{position:absolute;top:0;bottom:0;width:51%;background:var(--bg);transition:transform 1s cubic-bezier(.6,0,.2,1)}
+#intro .hl{left:0}
+#intro .hr{right:0;transform:scaleX(-1)}
+#intro .hr.open{transform:scaleX(-1) translateX(105%)}
+#intro .hl.open{transform:translateX(-105%)}
+#intro .stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s;padding:24px;text-align:center}
+#intro.out .stage{opacity:0}
+#intro .gridsvg{width:min(54vw,210px);height:auto;overflow:visible}
+#intro .gl{stroke:var(--accent);stroke-width:2;fill:none;stroke-linecap:round;stroke-dasharray:var(--len,220);stroke-dashoffset:var(--len,220);opacity:.8}
+#intro.go .gl{animation:idraw .7s ease-out forwards;animation-delay:var(--dl,0s)}
+@keyframes idraw{to{stroke-dashoffset:0}}
+#intro .cellf{fill:var(--sea);opacity:0}
+#intro.go .cellf{animation:icell .5s ease forwards;animation-delay:var(--dl,.7s)}
+@keyframes icell{to{opacity:.22}}
+#intro .cellm{fill:var(--muted);opacity:0}
+#intro.go .cellm{animation:icellm .6s ease forwards;animation-delay:1s}
+@keyframes icellm{to{opacity:.4}}
+#intro h2{color:var(--ink);font-family:var(--font-display);font-weight:900;font-size:clamp(34px,10vw,52px);letter-spacing:.14em;margin:0;opacity:0;transform:translateY(8px)}
+#intro.go h2{animation:iup .7s ease forwards;animation-delay:.6s}
+#intro .iday{color:var(--muted);letter-spacing:.2em;font-size:13px;opacity:0}
+#intro.go .iday{animation:iup .6s ease forwards;animation-delay:.95s}
+#intro .say{display:flex;align-items:center;gap:10px;max-width:320px;text-align:left;font-size:14px;line-height:1.55;opacity:0}
+#intro .say img{width:46px;height:46px;border-radius:50%;border:2px solid var(--line);flex:none}
+#intro.go .say{animation:iup .6s ease forwards;animation-delay:var(--sd,1.5s)}
+@keyframes iup{to{opacity:1;transform:none}}
+#intro .skip,#intro .snd{position:absolute;top:max(12px,env(safe-area-inset-top,0px));background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;font-size:12px;padding:6px 12px;min-height:32px}
+#intro .skip{right:max(12px,env(safe-area-inset-right,0px))}
+#intro .snd{left:max(12px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:4px}
+#intro .snd svg{width:16px;height:16px}
+.opt{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:6px;min-height:28px}
+.opt button{background:none;border:0;color:var(--accent);text-decoration:underline;padding:0;font-size:13px}
+@media (prefers-reduced-motion:reduce){
+  #intro .half{transition:none}
+  #intro.go .gl,#intro.go .cellf,#intro.go .cellm{animation-duration:.01s;animation-delay:0s}
+  #intro .gl{stroke-dashoffset:0}
+  #intro.go h2,#intro.go .iday,#intro.go .say{animation-duration:.4s;animation-delay:0s;transform:none}
+}
 </style>
 
 <div class="wrap">
@@ -117,11 +158,25 @@ label.l{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
     <div class="sum"><span>今日亮燈 <b id="tonight">0</b> / 3</span><span>三燈齊亮的連續天數 <b id="run">0</b></span></div>
     <div class="days" id="days"></div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <label class="opt"><input type="checkbox" id="introOn"> 每天第一次打開時播放開場動畫<button type="button" id="introReplay">重播一次</button></label>
     <details class="how"><summary>怎麼點亮？</summary><p class="note">遊戲完成當天的題目後，按完成畫面上的「回入口」，這裡就會自動點亮。紀錄只存在這個瀏覽器，也可以手動勾選或取消。</p></details>
   </section>
 </div>
 
 
+
+
+<div id="intro" role="dialog" aria-label="開場" hidden>
+  <div class="half hl"></div><div class="half hr"></div>
+  <div class="stage">
+    <svg class="gridsvg" viewBox="0 0 120 120" aria-hidden="true" id="igrid"></svg>
+    <h2>錨界</h2>
+    <div class="iday" id="iday"></div>
+    <div class="say" id="isay" hidden><img id="isayimg" alt=""><span id="isaytxt"></span></div>
+  </div>
+  <button class="snd" id="isnd" type="button" aria-pressed="false" aria-label="開啟音效"></button>
+  <button class="skip" id="iskip" type="button">跳過</button>
+</div>
 
 <script>
 (function(){
@@ -210,6 +265,85 @@ function applyHash(){
   try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
 }
 window.addEventListener("hashchange",applyHash);
-renderToday();renderCards();renderLamps();applyHash();
+
+/* ===== 開場動畫 ===== */
+var IKEY="anchor:intro:v1",IS={last:"",seen:false,off:false,snd:false};
+try{var ir=localStorage.getItem(IKEY);if(ir){var io=JSON.parse(ir);IS.last=io.last||"";IS.seen=!!io.seen;IS.off=!!io.off;IS.snd=!!io.snd}}catch(e){}
+function isave(){try{localStorage.setItem(IKEY,JSON.stringify(IS))}catch(e){}}
+var SPK_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></svg>';
+var SPK_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+var actx=null;
+function anchorTone(){ // 錨音：主音 → 上行五度 → 落回主音
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    if(!actx)actx=new AC();
+    if(actx.state==="suspended")actx.resume();
+    if(actx.state!=="running")return;
+    var t=actx.currentTime+.02,seq=[523.25,783.99,523.25],i;
+    for(i=0;i<3;i++){
+      [[1,1],[2,.25],[2.76,.12]].forEach(function(pt){
+        var o=actx.createOscillator(),g=actx.createGain();
+        o.type="sine";o.frequency.value=seq[i]*pt[0];
+        var s=t+i*.28,e=s+(i===2?1.4:.7);
+        g.gain.setValueAtTime(.0001,s);g.gain.linearRampToValueAtTime(.09*pt[1],s+.01);g.gain.exponentialRampToValueAtTime(.0001,e);
+        o.connect(g);g.connect(actx.destination);o.start(s);o.stop(e+.05);
+      });
+    }
+  }catch(e){}
+}
+function buildGrid(missCell){
+  var s='',i,cs=36,g=6,NS="";
+  // 3×3 格線（四條線）＋外框
+  var L=[[0,40,120,40,"0s"],[0,80,120,80,".1s"],[40,0,40,120,".2s"],[80,0,80,120,".3s"],[0,0,120,0,".4s"],[0,120,120,120,".4s"],[0,0,0,120,".5s"],[120,0,120,120,".5s"]];
+  L.forEach(function(l){var len=Math.max(Math.abs(l[2]-l[0]),Math.abs(l[3]-l[1]));s+='<line class="gl" x1="'+l[0]+'" y1="'+l[1]+'" x2="'+l[2]+'" y2="'+l[3]+'" style="--len:'+len+';--dl:'+l[4]+'"/>'}); 
+  for(i=0;i<9;i++){
+    var x=(i%3)*40+3,y=Math.floor(i/3)*40+3;
+    if(i===missCell)s+='<rect class="cellm" x="'+x+'" y="'+y+'" width="34" height="34" rx="3"/>';
+    else s+='<rect class="cellf" x="'+x+'" y="'+y+'" width="34" height="34" rx="3" style="--dl:'+(.7+i*.05)+'s"/>';
+  }
+  return s;
+}
+var introTimer=null;
+function endIntro(){
+  var el=$("intro");if(el.hidden)return;
+  clearTimeout(introTimer);
+  el.classList.add("out");
+  el.querySelector(".hl").classList.add("open");el.querySelector(".hr").classList.add("open");
+  setTimeout(function(){el.hidden=true;el.className=""},reduceMotion()?60:1000);
+}
+function reduceMotion(){try{return window.matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}}
+function playIntro(force){
+  var el=$("intro"),first=!IS.seen,y=add(today,-1),run=0,d=y;
+  while(count(d)===3){run++;d=add(d,-1)}
+  var say=null,miss=-1,dur=2600;
+  if(first){say=[1,"歡迎來到測繪院，校準員。灰潮在吞世界，你每天校準三處。"];dur=5600}
+  else if(run>0&&run%7===0){say=[11,"備燈給你了。"];dur=3600}
+  else if(count(y)===3){say=[10,"記下了。"];dur=3600}
+  else if(dd(START,y)>=0&&count(y)===0){say=[7,"昨天的缺口還在。"];miss=4;dur=3800}
+  $("iday").textContent="錨曆第 "+(idx+1)+" 日";
+  $("igrid").innerHTML=buildGrid(miss);
+  var sd=$("isay");
+  if(say){$("isayimg").src=face(say[0]);$("isaytxt").textContent=say[1];sd.hidden=false;sd.style.setProperty("--sd",first?"1.5s":"1.4s")}else sd.hidden=true;
+  $("isnd").innerHTML=(IS.snd?SPK_ON:SPK_OFF)+"<span>"+(IS.snd?"有聲":"無聲")+"</span>";
+  $("isnd").setAttribute("aria-pressed",IS.snd?"true":"false");
+  el.hidden=false;el.className="";
+  el.querySelector(".hl").classList.remove("open");el.querySelector(".hr").classList.remove("open");
+  void el.offsetWidth;el.classList.add("go");
+  if(IS.snd)setTimeout(anchorTone,700);
+  if(reduceMotion())dur=Math.min(dur,2200);
+  introTimer=setTimeout(endIntro,dur);
+  IS.seen=true;IS.last=today;isave();
+}
+$("intro").addEventListener("click",function(e){if(e.target.closest("#isnd"))return;endIntro()});
+$("isnd").addEventListener("click",function(e){e.stopPropagation();IS.snd=!IS.snd;isave();$("isnd").innerHTML=(IS.snd?SPK_ON:SPK_OFF)+"<span>"+(IS.snd?"有聲":"無聲")+"</span>";$("isnd").setAttribute("aria-pressed",IS.snd?"true":"false");if(IS.snd)anchorTone()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("intro").hidden)endIntro()});
+$("introOn").checked=!IS.off;
+$("introOn").addEventListener("change",function(){IS.off=!$("introOn").checked;isave()});
+$("introReplay").addEventListener("click",function(){playIntro(true)});
+var returning=/^#done-/.test(location.hash||"");
+renderToday();renderCards();renderLamps();
+if(!IS.off&&IS.last!==today&&!returning)playIntro();
+else if(returning&&IS.last!==today){IS.seen=true;IS.last=today;isave()}
+applyHash();
 })();
 </script>
