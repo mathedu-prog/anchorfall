@@ -39,6 +39,10 @@ h1{font-family:var(--font-display);font-weight:900;font-size:clamp(26px,7vw,38px
 .today .d{font-size:12px;color:var(--muted);letter-spacing:.06em;font-variant-numeric:tabular-nums}
 .today .q{font-family:var(--font-display);font-weight:600;font-size:clamp(17px,4.4vw,22px);line-height:1.45;text-wrap:balance}
 .today .who{font-size:12px;color:var(--muted);letter-spacing:.1em;text-align:right}
+.today .who .role{display:block;font-size:11px;letter-spacing:.06em;opacity:.85}
+.cen summary{cursor:pointer;font-size:12px;color:var(--accent);list-style:none;display:inline-block;border-bottom:1px dotted var(--accent);min-height:24px;line-height:24px}
+.cen summary::-webkit-details-marker{display:none}
+.cen p{margin:4px 0 0;font-size:13px;line-height:1.6;color:var(--muted)}
 .week-chip{font-size:11px;border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:0 9px}
 h2{font-size:12px;letter-spacing:.14em;color:var(--muted);margin:0 0 4px;font-weight:700}
 .cards{display:flex;flex-direction:column;gap:8px}
@@ -93,7 +97,8 @@ label.l{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
   <section class="today" aria-label="岑禾今日一句">
     <div class="top"><span class="d" id="dateLine"></span><span class="week-chip" id="weekChip"></span></div>
     <div class="q" id="quote"></div>
-    <div class="who">— 岑禾</div>
+    <div class="who">— 岑禾 <span class="role">測繪院資深校準官・人稱「老尺」</span></div>
+    <details class="cen"><summary>岑禾是誰？</summary><p>世界正在被「灰潮」一格一格吞成霧，測繪院的校準官靠邊界讀數，把被吞掉的地方重新釘回現實。岑禾是院裡最資深的一位，也是教你每一個技巧的人。左眼是一枚黃銅校準鏡，口袋裡插著一把缺了刻度的舊尺。她嘴硬、不愛說「做得好」，只說「記下了」。至於她自己的過去，她從不主動提。</p></details>
   </section>
 
   <section aria-labelledby="hCards">
