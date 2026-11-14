@@ -1,0 +1,2067 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>發現大樓謎題</title>
+<style>
+  /* ===== Design Tokens：藍圖風（淺色＝藍圖紙，深色＝夜間製圖板） ===== */
+  :root {
+    color-scheme:light;
+    --bg:#e8eef4; --card:#fbfdfe; --card2:#edf2f7; --ink:#1c2c3e; --muted:#62768a;
+    --line:#c7d3de; --line2:#d9e2eb; --grid:rgba(44,106,154,.075);
+    --accent:#c4503a; --accent-ink:#ffffff; --accent-soft:rgba(196,80,58,.16); --accent-glow:rgba(196,80,58,.45);
+    --blue:#2c6a9a; --blue-ink:#1d4f77; --blue-soft:#dbe9f4;
+    --ok:#287f61; --ok-soft:#d6eee4; --ok-line:#b2dac9;
+    --bad:#c44545; --bad-soft:#f8dddd;
+    --try:#4f63c0; --try-soft:#e1e6f8;
+    --star:#d9a23a; --star-off:#cdd7e0;
+    --note-bg:#fbefe2; --note-line:#ebd1b7;
+    --cell:#f2f6f9; --cell-line:#ccd8e2; --given-line:#8fa3b6;
+    --h1:#d3e5f3; --h1i:#1d5a85; --h2:#d2ece0; --h2i:#236a4c; --h3:#f2e4b9; --h3i:#7d5f18;
+    --h4:#f0d7d0; --h4i:#84473a; --h5:#dfdcf3; --h5i:#52469a; --h6:#cdeaed; --h6i:#1e6570; --h7:#efd3e2; --h7i:#843869;
+    --cover-a:#e38a6b; --cover-b:#c1503a; --cover-line:rgba(110,35,20,.42); --cover-deco:rgba(95,28,14,.34);
+    --done-a:#f7fafc; --done-b:#e2eaf1;
+    --canvas-a:#f4f8fb; --canvas-b:#d9e6f0;
+    --slab:166,182,197; --floor:#f6fafc; --floorline:#7b90a4; --floorgrid:rgba(30,60,90,.16); --chip:#ffffff; --chipink:#2c6a9a;
+    --overlay:rgba(14,28,44,.55); --toast:rgba(20,34,50,.94);
+    --sh1:0 1px 2px rgba(24,50,80,.10), 0 1px 1px rgba(24,50,80,.05);
+    --sh2:0 8px 22px rgba(24,50,80,.10), 0 1px 3px rgba(24,50,80,.08);
+    --sh3:0 18px 44px rgba(24,50,80,.22), 0 2px 6px rgba(24,50,80,.10);
+    --ease:cubic-bezier(.34,1.56,.64,1); --ease-out:cubic-bezier(.22,1,.36,1);
+  }
+  :root[data-theme="dark"] {
+    color-scheme:dark;
+    --bg:#0d1a27; --card:#162739; --card2:#1c3248; --ink:#dbe7f2; --muted:#8aa1b6;
+    --line:#2a4259; --line2:#233a50; --grid:rgba(120,180,230,.06);
+    --accent:#e07b62; --accent-ink:#2a100a; --accent-soft:rgba(224,123,98,.20); --accent-glow:rgba(224,123,98,.5);
+    --blue:#7fb6e3; --blue-ink:#a9d0ee; --blue-soft:#1d3a55;
+    --ok:#5fc59d; --ok-soft:#173d33; --ok-line:#25594a;
+    --bad:#ee7a7a; --bad-soft:#47232a;
+    --try:#97a6ee; --try-soft:#262f5a;
+    --star:#e6b550; --star-off:#34506a;
+    --note-bg:#32281f; --note-line:#5a4332;
+    --cell:#1b3046; --cell-line:#2d4863; --given-line:#6f8ba5;
+    --h1:#1f4261; --h1i:#aad1ef; --h2:#1e4a3b; --h2i:#a6dfc6; --h3:#55451b; --h3i:#f1d68c;
+    --h4:#56302b; --h4i:#f1bbac; --h5:#3a3567; --h5i:#cac4f1; --h6:#1d4a51; --h6i:#a3dde5; --h7:#56304b; --h7i:#f0b4d5;
+    --cover-a:#d27758; --cover-b:#a8432f; --cover-line:rgba(255,200,180,.28); --cover-deco:rgba(40,10,4,.38);
+    --done-a:#1b3046; --done-b:#142638;
+    --canvas-a:#17293c; --canvas-b:#0f2030;
+    --slab:46,68,92; --floor:#1a2f45; --floorline:#58789a; --floorgrid:rgba(150,195,235,.18); --chip:#1e3a55; --chipink:#9fcbf0;
+    --overlay:rgba(3,10,18,.68); --toast:rgba(3,10,18,.94);
+    --sh1:0 1px 2px rgba(0,0,0,.35), 0 1px 1px rgba(0,0,0,.2);
+    --sh2:0 8px 22px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.25);
+    --sh3:0 18px 44px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.3);
+  }
+  .ic { width:1.15em; height:1.15em; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none; vertical-align:-.2em; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background-color:var(--bg); color:var(--ink);
+         background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size:24px 24px; background-attachment:fixed;
+         font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+         display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:16px; }
+  h1 { font-size:22px; margin:8px 0 4px; }
+  .sub { color:var(--muted); font-size:14px; margin-bottom:12px; text-align:center; }
+  .bar { display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap; justify-content:center; }
+  .timer { font-variant-numeric:tabular-nums; font-weight:700; min-width:56px; text-align:center; }
+  button { font:inherit; cursor:pointer; border:0; border-radius:12px; padding:8px 14px; display:inline-flex; align-items:center; justify-content:center; gap:.4em;
+           background:var(--card); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line2), var(--sh1); }
+  button.primary { background:var(--accent); color:var(--accent-ink); font-weight:700; box-shadow:var(--sh1); }
+  button:active { transform:translateY(1px); }
+
+  /* 難度選擇 */
+  .levels { display:flex; gap:8px; margin-bottom:12px; }
+  .levels button { padding:8px 12px; text-align:center; line-height:1.3; }
+  .levels button small { display:block; font-size:11px; opacity:.75; }
+  .levels button.on { background:var(--accent); color:var(--accent-ink); font-weight:700; }
+  .tierdesc { font-size:13px; color:var(--muted); text-align:center; max-width:420px; line-height:1.5; margin:-4px 0 6px; }
+  .badge { font-size:13px; color:var(--ink); text-align:center; margin-bottom:10px; min-height:18px; }
+
+  /* 棋盤：(N+2)×(N+2)，中間 N×N 為輸入格，四周為提示 */
+  .board { display:grid; gap:6px; background:var(--card);
+           padding:14px; border-radius:20px; box-shadow:inset 0 0 0 1px var(--line2), var(--sh2); }
+  .clue { display:flex; align-items:center; justify-content:center; gap:2px; white-space:nowrap;
+          font-size:clamp(11px, calc(var(--s) * .46), 28px); font-weight:800; color:var(--blue-ink); background:var(--blue-soft);
+          border-radius:10px; transition:.2s; }
+  .clue:empty { background:none; }
+  .clue small { font-size:.85em; font-weight:900; line-height:1; color:var(--accent); opacity:1; margin:0; }
+  .clue.ok { color:var(--ok); background:var(--ok-soft); } .clue.ok small { color:var(--ok); }
+  .clue.bad { color:var(--bad); background:var(--bad-soft); } .clue.bad small { color:var(--bad); }
+  .cell { display:flex; align-items:center; justify-content:center; font-size:calc(var(--s) * .5);
+          font-weight:800; border-radius:12px; background:var(--cell); border:2px solid var(--cell-line);
+          cursor:pointer; user-select:none; transition:.15s; }
+  .cell.warn { box-shadow:inset 0 0 0 3px var(--bad); }
+  .cell.sel { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  .cell.h1 { background:var(--h1); color:var(--h1i); }
+  .cell.h2 { background:var(--h2); color:var(--h2i); }
+  .cell.h3 { background:var(--h3); color:var(--h3i); }
+  .cell.h4 { background:var(--h4); color:var(--h4i); }
+  .cell.h5 { background:var(--h5); color:var(--h5i); }
+  .cell.h6 { background:var(--h6); color:var(--h6i); }
+  .cell.h7 { background:var(--h7); color:var(--h7i); }
+  .tools { display:flex; gap:4px; justify-content:center; width:min(100%, 520px); margin-top:8px; }
+  .tb { flex:1 1 0; min-width:0; max-width:76px; flex-direction:column; gap:2px; padding:clamp(3px, calc(var(--s, 48px) * .1), 6px) 2px; border-radius:12px; position:relative;
+        font-size:clamp(10px, calc(var(--s, 48px) * .24), 12px); line-height:1.15; font-weight:600; color:var(--muted); background:transparent; box-shadow:none; }
+  .tb .ic { width:clamp(17px, calc(var(--s, 48px) * .46), 22px); height:clamp(17px, calc(var(--s, 48px) * .46), 22px); color:var(--ink); }
+  .tb:hover { background:var(--card2); }
+  .tb:disabled { opacity:.38; cursor:default; }
+  .tb:disabled:hover { background:transparent; }
+  .tb.hot { color:var(--ink); }
+  .tb.okb .ic, .tb.okb { color:var(--ok); } .tb.badb .ic, .tb.badb { color:var(--bad); }
+  .tb .cnt { position:absolute; top:0; right:calc(50% - 22px); min-width:15px; height:15px; padding:0 4px; border-radius:8px; background:var(--accent); color:var(--accent-ink);
+             font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; line-height:1; }
+  .tb .cnt .ic { width:9px; height:9px; color:var(--accent-ink); stroke-width:2.4; }
+  .tb .cnt.zero { background:var(--muted); }
+  #board.trying { box-shadow:inset 0 0 0 1px var(--try), 0 0 0 3px var(--try-soft), var(--sh2);
+    background-image:linear-gradient(var(--try-soft) 1px, transparent 1px), linear-gradient(90deg, var(--try-soft) 1px, transparent 1px); background-size:14px 14px; }
+  .cell.tent { color:var(--try) !important; font-style:italic; border:2px dashed var(--try); }
+  @media (max-height:620px) { .tools { margin-top:3px; } .tb { padding:2px 2px; } }
+  .cell.hinted { box-shadow:inset 0 0 0 2px var(--star); }
+  .cell.given { cursor:default; border-color:var(--given-line); box-shadow:inset 0 0 0 2px rgba(0,0,0,.08); }
+  .cell.dup { background:var(--bad-soft); color:var(--bad); border-color:var(--bad); }
+
+  .pad { display:flex; gap:6px; margin-top:16px; flex-wrap:wrap; justify-content:center; --pn:6; }
+  .pad button { --pw: min(var(--ps, 54px), calc((100vw - 32px - (var(--pn) - 1) * 6px) / var(--pn))); width:var(--pw); height:var(--pw); padding:0; font-size:clamp(14px, calc(var(--s, 48px) * .5), 24px); font-weight:800; }
+  #gameView { --ps: clamp(30px, calc(var(--s, 48px) * 1.15), 54px); }
+  .msg { min-height:28px; margin-top:12px; font-weight:700; text-align:center; }
+  .msg.ok { color:var(--ok); } .msg.bad { color:var(--bad); }
+
+  /* 教學彈窗 */
+  .overlay { position:fixed; inset:0; background:var(--overlay); display:none;
+             align-items:center; justify-content:center; padding:16px; z-index:10; }
+  .overlay.show { display:flex; }
+  .modal { background:var(--card); border-radius:22px; box-shadow:var(--sh3); padding:22px; width:min(440px, 100%); max-height:92vh; overflow:auto; }
+  .modal h2 { margin:0 0 8px; font-size:20px; }
+  .modal p { line-height:1.7; margin:8px 0; }
+  .dots { display:flex; gap:6px; justify-content:center; margin:12px 0; }
+  .dots i { width:8px; height:8px; border-radius:50%; background:var(--line); }
+  .dots i.on { background:var(--accent); }
+  .nav { display:flex; justify-content:space-between; gap:8px; margin-top:8px; }
+  .link { background:none; box-shadow:none; color:var(--muted); text-decoration:underline; padding:8px 4px; }
+
+  /* 教學示意：一排大樓 */
+  .demo { display:flex; align-items:flex-end; justify-content:center; gap:10px; height:130px;
+          background:var(--card2); border-radius:14px; padding:12px; margin:10px 0; }
+  .demo .side { align-self:center; font-weight:800; color:var(--blue); font-size:22px; text-align:center; width:44px; }
+  .demo .side small { display:block; font-size:11px; color:var(--muted); font-weight:400; }
+  .tower { width:48px; display:flex; align-items:flex-start; justify-content:center; color:var(--accent-ink);
+           font-weight:800; padding-top:4px; border-radius:6px 6px 0 0; transition:.2s; }
+  .tower.v { background:var(--accent); }
+  .tower.hid { background:var(--line); opacity:.7; }
+  .legend { font-size:13px; color:var(--muted); text-align:center; }
+  .legend b.v { color:var(--accent); } .legend b.h { color:#999; }
+
+  /* 過關 3D 動畫 */
+  .modal.wide { width:min(560px, 100%); text-align:center; }
+  #c3d { display:block; margin:8px auto 0; border-radius:14px; touch-action:none; cursor:grab;
+         background:linear-gradient(var(--canvas-a), var(--canvas-b)); }
+  #c3d:active { cursor:grabbing; }
+  .hint3d { color:var(--muted); font-size:13px; margin:8px 0; }
+  .ctrl3d { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:6px; }
+  .ctrl3d button.on { background:var(--accent); color:var(--accent-ink); font-weight:700; }
+  .winnote { font-weight:700; font-size:14px; line-height:1.5; margin-top:8px; }
+  .winnote:empty { display:none; }
+  @media (max-width:480px) {
+    body { padding:10px; }
+    h1 { font-size:20px; }
+    .sub { font-size:13px; }
+    .overlay { padding:8px; }
+    .modal { padding:16px; }
+    .calgrid { padding:8px; gap:4px; }
+  }
+
+  /* 每日月曆 */
+  #homeView { display:flex; flex-direction:column; align-items:center; width:100%; }
+  #gameView.daily .practice-only { display:none !important; }
+  .unlockbar { width:min(100%, 520px); background:var(--note-bg); border:1px solid var(--note-line); border-radius:12px;
+               padding:10px 14px; font-size:14px; line-height:1.5; text-align:center; margin-bottom:12px; }
+  .unlockbar.flash { animation:ubflash 1.2s ease; }
+  @keyframes ubflash { 0%,100% { box-shadow:0 0 0 0 transparent; } 25%,65% { box-shadow:0 0 0 4px var(--accent-glow); } }
+  .unlockbar.ok { background:var(--ok-soft); border-color:var(--ok-line); color:var(--ok); }
+  .unlockbar .ic { margin-right:.3em; }
+  .calnav { display:flex; align-items:center; gap:14px; margin-bottom:8px; font-weight:800; font-size:18px; }
+  .calnav button { width:38px; height:38px; padding:0; font-size:20px; }
+  .calnav button:disabled { opacity:.35; cursor:default; }
+  .calgrid { display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; width:min(100%, 520px);
+             background:var(--card); padding:12px; border-radius:20px; box-shadow:inset 0 0 0 1px var(--line2), var(--sh2); }
+  .calload { grid-column:1 / -1; text-align:center; color:var(--muted); padding:30px 0; }
+  .wd { text-align:center; font-size:12px; color:var(--muted); padding-bottom:2px; }
+  .calstat { margin:10px 0; font-size:14px; color:var(--muted); text-align:center; }
+  .day { position:relative; aspect-ratio:4 / 5; height:var(--dh); border-radius:10px; overflow:hidden; cursor:pointer; user-select:none; }
+  .day.today, .day.open, .day.locked, .day.future {
+    background:linear-gradient(160deg, var(--cover-a), var(--cover-b)); box-shadow:inset 0 0 0 2px var(--cover-line); }
+  .day .deco { position:absolute; left:6%; bottom:0; width:88%; height:48%; fill:var(--cover-deco); }
+  .day .dn { position:absolute; top:5px; left:7px; font-weight:800; font-size:clamp(13px, 3.6vw, 18px);
+             color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); z-index:1; }
+  .day .tag { position:absolute; left:4px; bottom:4px; font-size:10px; background:var(--card); color:var(--accent);
+              border-radius:6px; padding:1px 5px; font-weight:700; z-index:1; }
+  .day .lk { position:absolute; right:5px; bottom:5px; font-size:15px; z-index:1; color:#fff; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45)); line-height:0; }
+  .day.has-tag .tm { bottom:21px; left:5px; right:auto; text-align:left; }
+  .day .tm { position:absolute; left:0; right:0; bottom:3px; text-align:center; font-size:10px;
+             color:#fff; font-variant-numeric:tabular-nums; z-index:1; text-shadow:0 1px 2px rgba(0,0,0,.4); }
+  .day.today { animation:pulse 2s infinite; }
+  .day.locked { filter:grayscale(.85) brightness(1.05); }
+  .day.future { filter:grayscale(1) brightness(1.25); opacity:.5; cursor:default; }
+  .day.done { background:linear-gradient(var(--done-a), var(--done-b)); box-shadow:inset 0 0 0 2px var(--line); }
+  .day.done .dn { color:var(--ink); text-shadow:none; }
+  .day.done .tm { color:var(--muted); text-shadow:none; }
+  .day .mini { position:absolute; left:10%; bottom:15%; width:80%; height:auto; aspect-ratio:1; }
+  .day .mk { position:absolute; right:4px; top:3px; font-size:13px; z-index:1; }
+  .day.loading { animation:wob .45s infinite; }
+  .shake { animation:shake .4s; }
+  @keyframes shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 75% { transform:translateX(5px); } }
+  @keyframes wob { 0%,100% { transform:scale(1); } 50% { transform:scale(.92); } }
+  @keyframes pulse {
+    0%,100% { box-shadow:inset 0 0 0 2px var(--cover-line), 0 0 0 0 var(--accent-glow); }
+    50% { box-shadow:inset 0 0 0 2px var(--cover-line), 0 0 0 7px transparent; } }
+  #pwBox { position:fixed; inset:0; background:var(--overlay); display:none; align-items:center; justify-content:center; z-index:60; padding:16px; }
+  #pwBox.show { display:flex; }
+  .pwcard { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; width:min(100%, 340px); box-shadow:var(--sh3); }
+  .pwt { font-weight:700; font-size:18px; margin-bottom:4px; } .pwd { font-size:14px; color:var(--muted); margin-bottom:12px; line-height:1.5; }
+  .pwextra { width:100%; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 12px; border-radius:12px; background:var(--accent); color:var(--accent-ink); border:none; font-size:16px; cursor:pointer; }
+  .pwextra small { font-size:12px; opacity:.9; }
+  .pwor { font-size:12.5px; color:var(--muted); margin:14px 0 6px; line-height:1.45; }
+  .pwrow { display:flex; gap:8px; }
+  #pwIn { flex:1; min-width:0; font-size:16px; padding:9px 10px; border:1.5px solid var(--line); border-radius:10px; background:var(--card2); color:var(--ink); }
+  #pwOk { padding:0 16px; border-radius:10px; }
+  #pwErr { color:var(--bad); font-size:13px; min-height:18px; margin-top:6px; line-height:1.45; }
+  .pwb { display:flex; justify-content:center; margin-top:8px; }
+  .pwb button { background:none; border:none; box-shadow:none; color:var(--muted); font-size:15px; padding:6px 16px; cursor:pointer; }
+  #toast { position:fixed; left:50%; bottom:28px; transform:translate(-50%, 20px); background:var(--toast);
+           color:#f2f6fa; padding:10px 16px; border-radius:12px; font-size:14px; opacity:0; pointer-events:none;
+           transition:.25s; z-index:60; max-width:90vw; text-align:center; line-height:1.5; }
+  #toast.show { opacity:1; transform:translate(-50%, 0); }
+
+  /* 揭開封面的過場動畫 */
+  #reveal { position:fixed; inset:0; z-index:40; perspective:1400px; background:rgba(0,0,0,0); transition:background .5s, opacity .35s; }
+  #reveal.dim { background:rgba(20,16,8,.6); }
+  #reveal.out { opacity:0; }
+  .rv-box { position:fixed; transform-style:preserve-3d;
+            transition:left .6s cubic-bezier(.2,.8,.2,1), top .6s cubic-bezier(.2,.8,.2,1),
+                       width .6s cubic-bezier(.2,.8,.2,1), height .6s cubic-bezier(.2,.8,.2,1), border-radius .6s; }
+  .rv-inside { position:absolute; inset:0; border-radius:inherit; overflow:hidden; background:linear-gradient(var(--canvas-a), var(--canvas-b));
+               display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:16px; text-align:center; }
+  .rv-date { font-size:15px; color:var(--muted); font-weight:700; }
+  .rv-size { font-size:54px; font-weight:900; line-height:1; color:var(--accent); }
+  .rv-tier { font-size:20px; font-weight:800; background:var(--accent); color:var(--accent-ink); border-radius:999px; padding:2px 16px; }
+  .rv-sky { display:flex; align-items:flex-end; justify-content:center; gap:5px; height:90px; width:80%; margin:10px 0; }
+  .rv-sky i { flex:1; max-width:34px; height:var(--h); border-radius:3px 3px 0 0; transform-origin:bottom; transform:scaleY(0);
+              animation:rise .55s cubic-bezier(.2,1.3,.4,1) forwards; }
+  @keyframes rise { to { transform:scaleY(1); } }
+  .rv-par { font-size:14px; color:var(--muted); }
+  .rv-door { position:absolute; inset:0; border-radius:inherit; transform-origin:left center; backface-visibility:hidden;
+             background:linear-gradient(160deg, var(--cover-a), var(--cover-b)); box-shadow:inset 0 0 0 3px var(--cover-line);
+             transition:transform .8s cubic-bezier(.5,0,.2,1); overflow:hidden; }
+  .rv-door.open { transform:rotateY(-118deg); }
+  .rv-door .deco { position:absolute; left:6%; bottom:0; width:88%; height:48%; fill:var(--cover-deco); }
+  .rv-door .dn { position:absolute; top:50%; left:50%; transform:translate(-50%, -60%); font-size:96px; font-weight:900;
+                 color:#fff; text-shadow:0 3px 8px rgba(0,0,0,.35); }
+  .rv-door::after { content:''; position:absolute; right:14px; top:50%; width:14px; height:14px; border-radius:50%;
+                    background:#fff3e8; box-shadow:0 0 0 3px var(--cover-line); }
+
+  /* 遊戲畫面：全部塞進一個螢幕 */
+  #gameView { display:flex; flex-direction:column; align-items:center; width:100%; }
+  #gameView .sub, #gameView .tierdesc { display:none; }
+  .gbar { display:flex; align-items:center; gap:8px; width:min(100%, 520px); margin-bottom:4px; }
+  .gbar .seg { flex:1; min-width:0; }
+  .gbar h1 { flex:1; margin:0; font-size:16px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gbar button { padding:6px 10px; font-size:14px; }
+  .gbar .timer { min-width:48px; }
+  .seg { position:relative; display:grid; grid-template-columns:1fr 1fr; padding:3px; border-radius:999px; background:var(--card2); border:1px solid var(--line); box-shadow:inset 0 1px 2px rgba(24,50,80,.08); width:min(100%, 260px); }
+  #homeSeg { margin:0 auto 6px; }
+  .seg button { position:relative; z-index:1; background:none; border:none; box-shadow:none; padding:7px 4px; font-size:14px; font-weight:600; color:var(--muted); border-radius:999px; cursor:pointer; white-space:nowrap; transition:color .25s var(--ease-out); }
+  .seg[data-on="daily"] button[data-m="daily"], .seg[data-on="practice"] button[data-m="practice"] { color:var(--accent-ink); }
+  .segthumb { position:absolute; z-index:0; top:3px; bottom:3px; left:3px; width:calc(50% - 3px); border-radius:999px; background:var(--accent); box-shadow:0 2px 8px var(--accent-glow); transition:transform .35s var(--ease); }
+  .seg[data-on="practice"] .segthumb { transform:translateX(100%); }
+  .timerbtn { display:inline-flex; align-items:center; justify-content:center; gap:4px; min-width:64px; padding:6px 6px !important; background:none; border:none; box-shadow:none; color:var(--ink); cursor:pointer; }
+  .timerbtn .ic { width:15px; height:15px; opacity:.5; }
+  .timerbtn .ic:last-child { display:none; }
+  #gameView.zen .timerbtn .timer, #gameView.zen .timerbtn .ic:first-of-type { display:none; }
+  #gameView.zen .timerbtn .ic:last-child { display:inline-block; width:20px; height:20px; opacity:.75; }
+  #gameView.zen .tgt { display:none; }
+  #gameView .badge { margin-bottom:6px; font-size:12px; min-height:16px; }
+  .selrow { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:8px; }
+  .selrow .levels { margin:0; gap:4px; }
+  .selrow .levels button { padding:6px 10px; font-size:14px; }
+  #gameView .msg { margin-top:8px; min-height:22px; font-size:14px; }
+  #gameView .pad { margin-top:6px; }
+  .actions { display:flex; gap:8px; justify-content:center; align-items:stretch; margin-top:8px; width:min(100%, 520px); }
+  .actions > button { padding:clamp(6px, calc(var(--s, 48px) * .17), 10px) clamp(10px, calc(var(--s, 48px) * .3), 15px); font-size:clamp(13px, calc(var(--s, 48px) * .34), 17px); }
+  .actions .primary { flex:1 1 130px; max-width:260px; }
+  .morewrap { position:relative; display:flex; }
+  #btnMore { width:clamp(40px, calc(var(--s, 48px) * .95), 50px); padding:0; }
+  #btnMore .ic { width:20px; height:20px; }
+  #btnMore[aria-expanded="true"] { background:var(--card2); }
+  .menu { position:absolute; left:0; bottom:calc(100% + 8px); min-width:176px; background:var(--card); border-radius:16px; padding:6px; z-index:30; display:none; flex-direction:column;
+          box-shadow:inset 0 0 0 1px var(--line), var(--sh3); transform-origin:bottom left; }
+  .menu.show { display:flex; animation:menuin .18s var(--ease-out); }
+  @keyframes menuin { from { opacity:0; transform:translateY(6px) scale(.96); } to { opacity:1; transform:none; } }
+  .menu button { justify-content:flex-start; gap:10px; width:100%; background:none; box-shadow:none; padding:10px 12px; border-radius:10px; white-space:nowrap; font-size:15px; }
+  .menu button:hover { background:var(--card2); }
+  .menu .ic { width:18px; height:18px; color:var(--muted); }
+  .menu hr { border:0; border-top:1px solid var(--line2); margin:4px 6px; width:calc(100% - 12px); }
+  #gameView.fin #pad, #gameView.fin #btnCheck, #gameView.fin #btnClear { display:none; }
+
+  /* 月曆首頁：全部塞進一個螢幕（日期格大小由 fitCalendar 依螢幕計算） */
+  #homeView > .sub { display:none; }
+  #homeView h1 { font-size:20px; margin:2px 0 6px; }
+  #homeView .unlockbar { padding:6px 12px; font-size:13px; margin-bottom:8px; }
+  #homeView .calnav { margin-bottom:6px; font-size:16px; gap:10px; }
+  #homeView .calnav button { width:32px; height:32px; font-size:18px; }
+  #homeView .calstat { margin:4px 0; font-size:12px; line-height:1.3; }
+  #homeView .bar { margin:6px 0 0; flex-wrap:nowrap; gap:8px; width:min(100%, 520px); }
+  #homeView .bar button { padding:0 14px; height:44px; border-radius:14px; }
+  #homeView .bar #btnPractice { flex:1 1 auto; font-weight:700; }
+  #homeView .bar .mbtn { flex:none; width:44px; padding:0; }
+  #homeView .bar .mbtn .ic { width:20px; height:20px; }
+  #homeView .bar #btnHelp2 { flex:none; }
+  .calgrid { margin:0 auto; }
+
+  /* 版面順序：手機＝棋盤、訊息、工具列、數字鍵、按鈕列；電腦＝棋盤、數字鍵（緊貼棋盤下方）、訊息、工具列＋按鈕列同一排 */
+  .ctrl, .rowbtn { display:contents; }
+  #board { order:1; } #msg { order:2; } #tools { order:3; } #pad { order:4; } .actions { order:5; }
+  @media (min-width:760px) {
+    #pad { order:2; margin-top:10px; }
+    #msg { order:3; }
+    .rowbtn { display:flex; order:4; gap:18px; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:6px; }
+    .rowbtn .tools, .rowbtn .actions { order:0; margin-top:0; width:auto; }
+    .tb { flex:0 0 66px; }
+    .actions .primary { flex:0 0 auto; }
+  }
+  @media (max-height:620px) {                       /* 視窗很矮（例如瀏覽器放大顯示）時，縮小周邊元件 */
+    body { padding-top:6px; padding-bottom:6px; }
+    .gbar button { padding:4px 10px; }
+    .seg button { padding:4px 4px; font-size:13px; }
+    #homeSeg { margin-bottom:2px; }
+    #homeView h1 { margin:2px 0; font-size:19px; }
+    #gameView .badge { margin-bottom:2px; }
+    .selrow { margin-bottom:4px; }
+    .selrow .levels button { padding:4px 10px; }
+    #gameView .msg { margin-top:4px; min-height:20px; }
+  }
+  .sbar { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; font-size:14px; font-weight:800; }
+  .sbar span { background:var(--card); border:1px solid var(--line); border-radius:999px; padding:3px 12px; white-space:nowrap; display:inline-flex; align-items:center; gap:.35em; box-shadow:var(--sh1); }
+  .sbar .fire.on { background:var(--note-bg); border-color:var(--note-line); color:var(--accent); }
+  .sbar .star .ic { color:var(--star); }
+  .sbar .fire.off { color:var(--muted); font-weight:600; }
+  .day .mk.st { right:auto; left:7px; top:24px; font-size:10px; color:var(--star); letter-spacing:-1px; text-shadow:none; }
+  .day .mk.st i { font-style:normal; color:var(--star-off); }
+  @media (max-height:620px) { .sbar { margin-bottom:3px; font-size:13px; } .sbar span { padding:1px 10px; } }
+  .winnote { white-space:pre-line; }
+  .mbtn { min-width:38px; }
+  .mbtn.off { opacity:.55; }
+</style>
+<script>(function(){try{var t=localStorage.getItem('skyscraperTheme');if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}})()</script>
+
+
+  <!-- 首頁：每日月曆 -->
+  <div id="homeView">
+    <div class="seg" id="homeSeg" role="tablist" data-on="daily"><span class="segthumb"></span><button role="tab" data-m="daily">每日謎題</button><button role="tab" data-m="practice">自由練習</button></div>
+    <h1><i data-ic="building"></i> 發現大樓・每日謎題</h1>
+    <div class="sub">每天一題，盤面大小與難度由系統排程隨機決定</div>
+    <div class="sbar" id="statBar"></div>
+    <div class="unlockbar" id="unlockBar"></div>
+    <div class="calnav">
+      <button id="calPrev">‹</button><span id="calTitle"></span><button id="calNext">›</button>
+    </div>
+    <div class="calgrid" id="calGrid"></div>
+    <div class="calstat" id="calStat"></div>
+    <div class="calstat" id="syncStat"></div>
+    <div class="bar">
+      <button id="btnMusic" class="mbtn" aria-label="背景音樂"></button>
+      <button id="btnTheme2" class="mbtn" aria-label="切換深淺色"></button>
+      <button id="btnHelp2">教學</button>
+    </div>
+  </div>
+
+  <!-- 遊戲畫面（標題列、棋盤、訊息、數字鍵、按鈕全部放在同一個螢幕內） -->
+  <div id="gameView" style="display:none">
+    <div class="gbar">
+      <div class="seg" id="gameSeg" role="tablist" data-on="daily"><span class="segthumb"></span><button role="tab" data-m="daily">每日謎題</button><button role="tab" data-m="practice">自由練習</button></div>
+      <h1 id="gameTitle" hidden></h1>
+      <button class="timerbtn" id="timerBtn" aria-pressed="false" aria-label="顯示或隱藏時間" title="點一下隱藏／顯示時間"><span class="timer" id="timer">00:00</span><i data-ic="eye"></i><i data-ic="eyeoff"></i></button>
+      <button id="btnMusic2" class="mbtn" aria-label="背景音樂"></button>
+      <button id="btnHelp" class="mbtn" aria-label="教學"><i data-ic="help"></i></button>
+    </div>
+    <div class="sub" id="sub"></div>
+    <div class="badge" id="badge"></div>
+    <div class="selrow practice-only">
+      <div class="levels" id="sizes">
+        <button data-n="3">3×3</button>
+        <button data-n="4">4×4</button>
+        <button data-n="5">5×5</button>
+        <button data-n="6">6×6</button>
+        <button data-n="7">7×7</button>
+      </div>
+      <div class="levels" id="tiers">
+        <button data-t="0">簡單</button>
+        <button data-t="1">中等</button>
+        <button data-t="2">困難</button>
+      </div>
+    </div>
+    <div class="tierdesc practice-only" id="tierDesc"></div>
+
+    <div class="board" id="board"></div>
+    <div class="msg" id="msg"></div>
+    <div class="rowbtn">
+    <div class="tools" id="tools">
+      <button class="tb" id="btnUndo" title="復原上一步（Z）"><i data-ic="undo"></i><span>復原</span></button>
+      <button class="tb" id="btnRedo" title="重做（Y）"><i data-ic="redo"></i><span>重做</span></button>
+      <button class="tb" id="btnErase" title="擦掉選取格的數字（Backspace）"><i data-ic="eraser"></i><span>橡皮擦</span></button>
+      <button class="tb" id="btnRed" title="一次清掉所有紅色（重複）的數字"><i data-ic="clearred"></i><span>清紅格</span></button>
+      <button class="tb" id="btnTry" title="不確定時先試著填；試探中的數字用虛線標示（T）"><i data-ic="pencil"></i><span>試探</span></button>
+      <button class="tb okb" id="btnAdopt" style="display:none" title="把試探中的數字全部變成確定"><i data-ic="check"></i><span>採用</span></button>
+      <button class="tb badb" id="btnRevert" style="display:none" title="把試探中填的數字全部清掉，回到試探前"><i data-ic="x"></i><span>撤回</span></button>
+      <button class="tb" id="btnHint" title="先點一格空格，再按這裡，告訴你那格的答案；每次加 30 秒"><i data-ic="bulb"></i><span>提示</span><b class="cnt" id="hintCnt"></b></button>
+    </div>
+    <div class="actions">
+      <div class="morewrap">
+        <button id="btnMore" aria-label="更多功能" aria-haspopup="true" aria-expanded="false"><i data-ic="more"></i></button>
+        <div class="menu" id="moreMenu" role="menu">
+          <button id="btnClear"><i data-ic="trash"></i>清空盤面</button>
+          <button id="btnNew" class="practice-only"><i data-ic="plus"></i>新題目</button>
+          <button id="btnReplay" style="display:none"><i data-ic="play"></i>重播動畫</button>
+          <button id="btnRetry" style="display:none"><i data-ic="retry"></i>重新挑戰</button>
+          <hr>
+          <button id="btnTheme"></button>
+        </div>
+      </div>
+      <button class="primary" id="btnCheck"><i data-ic="check"></i>檢查答案</button>
+    </div>
+    </div>
+    <div class="ctrl"><div class="pad" id="pad"></div></div><!-- /ctrl -->
+  </div><!-- /gameView -->
+
+  <!-- 過關 3D 動畫 -->
+  <div class="overlay" id="win">
+    <div class="modal wide">
+      <h2><i data-ic="star"></i> 過關！<span id="winTime" style="font-weight:400;font-size:15px;color:var(--muted)"></span></h2>
+      <canvas id="c3d"></canvas>
+      <div class="winnote" id="winNote"></div>
+      <div style="text-align:center"><a id="hubLink" hidden href="./index.html#done-tower" style="display:inline-block;margin:6px 0;padding:8px 18px;border-radius:10px;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:700">回錨界入口，點亮天測</a></div>
+      <div class="hint3d">左右拖曳可任意旋轉，上下拖曳可調整俯視角度</div>
+      <div class="ctrl3d">
+        <button id="w3L"><i data-ic="rotl"></i>90°</button>
+        <button id="w3R">90°<i data-ic="rotr"></i></button>
+        <button id="w3Auto" class="on">自動旋轉</button>
+        <button id="w3Replay"><i data-ic="retry"></i>重播</button>
+      </div>
+      <div class="nav">
+        <button class="link" id="w3Close">關閉</button>
+        <button id="w3Retry" style="display:none"><i data-ic="retry"></i>重新挑戰</button>
+        <button class="primary" id="w3New">再來一題</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 教學 -->
+  <div class="overlay" id="tutorial">
+    <div class="modal">
+      <h2 id="tTitle"></h2>
+      <div id="tDemo"></div>
+      <div id="tBody"></div>
+      <div class="dots" id="tDots"></div>
+      <div class="nav">
+        <button class="link" id="tSkip">跳過教學</button>
+        <span>
+          <button id="tPrev">上一步</button>
+          <button class="primary" id="tNext">下一步</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+<div id="pwBox"><div class="pwcard">
+  <div class="pwt">需要一點靈感嗎？</div>
+  <div class="pwd">免費提示都用完了。想繼續的話，可以用額外提示，或輸入通行碼。</div>
+  <button id="pwExtra" class="pwextra"><b>用額外提示</b><small id="pwExtraSub"></small></button>
+  <div class="pwor">有通行碼？（解鎖後提示不限次數，每次 +30 秒、不影響星星）</div>
+  <div class="pwrow"><input id="pwIn" type="password" autocomplete="off" placeholder="通行碼"><button id="pwOk">解鎖</button></div>
+  <div id="pwErr"></div>
+  <div class="pwb"><button id="pwCancel">再想想</button></div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+
+/* ========== 圖示（統一 24px 格線、1.8 線寬的線條圖示）與深淺色主題 ========== */
+const ICONS = {
+  building:'<path d="M4 21V9l6-3v15M10 21V12l6-2v11M2.5 21h19"/><path d="M6.5 11.5h1M6.5 15h1M13 14.5h1M13 18h1"/>',
+  grid:'<rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M9.3 4v16M14.7 4v16M4 9.3h16M4 14.7h16"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  redo:'<path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+  eraser:'<path d="M13.2 5.3a1.8 1.8 0 0 1 2.5 0l3 3a1.8 1.8 0 0 1 0 2.5l-7.4 7.4H7.6l-2.9-2.9a1.8 1.8 0 0 1 0-2.5z"/><path d="m9.5 9 6.5 6.5M11 19.5h9"/>',
+  clearred:'<rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m9 9 6 6M15 9l-6 6"/>',
+  pencil:'<path d="M4 20l1.2-4.4L16 4.8a2.1 2.1 0 0 1 3 3L8.4 18.8z"/><path d="m14 7 3 3"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  bulb:'<path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/><path d="M9.8 19h4.4M10.5 21.5h3"/>',
+  more:'<circle cx="5.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+  trash:'<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  play:'<path d="M8 5.5v13l10.5-6.5z"/>',
+  retry:'<path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4.5v4.5h4.5"/>',
+  rotl:'<path d="M5 9a8 8 0 1 1-1 4"/><path d="M5 4v5h5"/>',
+  rotr:'<path d="M19 9a8 8 0 1 0 1 4"/><path d="M19 4v5h-5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.8v2M12 19.2v2M2.8 12h2M19.2 12h2M5.5 5.5l1.4 1.4M17.1 17.1l1.4 1.4M5.5 18.5l1.4-1.4M17.1 6.9l1.4-1.4"/>',
+  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  unlock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.4-2"/>',
+  flame:'<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.5 1 2 1.8 2.2C10.5 8 11 5.5 12 3z"/>',
+  snow:'<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/>',
+  star:'<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.9z"/>',
+  note:'<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+  noteoff:'<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/><path d="M3 3l18 18"/>',
+  calendar:'<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M8.5 3v4M15.5 3v4"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  cloud:'<path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 9a4.5 4.5 0 0 1 0 9z"/>',
+  cloudok:'<path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 9a4.5 4.5 0 0 1 0 9z"/><path d="m9.5 13.5 2 2 3.5-3.5"/>',
+  device:'<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/>',
+  warn:'<path d="M12 4 2.8 20h18.4z"/><path d="M12 10v4.5M12 17.4v.1"/>',
+  timer:'<circle cx="12" cy="13" r="7.5"/><path d="M12 9v4.2l2.6 1.6M9.5 3h5"/>',
+  eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6"/>',
+  eyeoff:'<path d="M4 4l16 16"/><path d="M9.9 5.7a9.4 9.4 0 0 1 2.1-.2c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-3 3.8M6.3 7.6A16 16 0 0 0 2.5 12S6 18.5 12 18.5a9.5 9.5 0 0 0 4-.9"/><path d="M10 10.2a2.6 2.6 0 0 0 3.7 3.6"/>',
+  help:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.8M12 17v.1"/>'
+};
+const ic = (n, cls) => '<svg class="ic' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[n] || '') + '</svg>';
+function hydrateIcons(root) { (root || document).querySelectorAll('i[data-ic]').forEach(e => { e.outerHTML = ic(e.dataset.ic); }); }
+hydrateIcons();
+
+const THEME_KEY = 'skyscraperTheme';
+let TH = {};
+function readTheme() {
+  const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
+  TH = { slab: v('--slab').split(',').map(Number), floor: v('--floor'), floorLine: v('--floorline'), floorGrid: v('--floorgrid'), chip: v('--chip'), chipInk: v('--chipink') };
+}
+function curTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+function paintTheme() {
+  const dark = curTheme() === 'dark';
+  const t = $('btnTheme'); if (t) t.innerHTML = ic(dark ? 'sun' : 'moon') + (dark ? '淺色模式' : '深色模式');
+  const t2 = $('btnTheme2'); if (t2) { t2.innerHTML = ic(dark ? 'sun' : 'moon'); t2.title = dark ? '切換成淺色' : '切換成深色'; }
+}
+function setTheme(t, save) {
+  document.documentElement.setAttribute('data-theme', t);
+  if (save) { try { localStorage.setItem(THEME_KEY, t); } catch (e) {} }
+  readTheme(); paintTheme();
+}
+function toggleTheme() { setTheme(curTheme() === 'dark' ? 'light' : 'dark', true); }
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => { let saved = null; try { saved = localStorage.getItem(THEME_KEY); } catch (x) {} if (saved !== 'dark' && saved !== 'light') setTheme(e.matches ? 'dark' : 'light', false); }); } catch (e) {}
+
+/* ========== 核心邏輯（支援任意 N） ========== */
+const KEYS = ['top', 'bottom', 'left', 'right'];
+const ARROW = { top:'↓', bottom:'↑', left:'→', right:'←' };
+
+// 一排大樓從起點能看到幾棟
+function countVisible(line) {
+  let max = 0, cnt = 0;
+  for (const h of line) if (h > max) { max = h; cnt++; }
+  return cnt;
+}
+const rev = a => a.slice().reverse();
+// 亂數來源可替換：每日謎題用「日期種子」的亂數，讓所有玩家拿到同一題
+let RNG = Math.random;
+function mulberry32(a) { return function() { let t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(RNG()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+// 四個方向的線（board 為二維陣列）
+function lines(b, n) {
+  const col = c => b.map(r => r[c]);
+  const idx = [...Array(n).keys()];
+  return {
+    top:    idx.map(c => col(c)),
+    bottom: idx.map(c => rev(col(c))),
+    left:   idx.map(r => b[r].slice()),
+    right:  idx.map(r => rev(b[r]))
+  };
+}
+
+// 扁平陣列 g（長度 n*n）的提示向量：順序 top, bottom, left, right
+function clueVec(g, n) {
+  const out = new Int8Array(4 * n);
+  for (let i = 0; i < n; i++) {
+    let m = 0, c = 0;
+    for (let j = 0; j < n; j++) { const h = g[j*n+i]; if (h > m) { m = h; c++; } }
+    out[i] = c; m = 0; c = 0;
+    for (let j = n-1; j >= 0; j--) { const h = g[j*n+i]; if (h > m) { m = h; c++; } }
+    out[n+i] = c; m = 0; c = 0;
+    for (let j = 0; j < n; j++) { const h = g[i*n+j]; if (h > m) { m = h; c++; } }
+    out[2*n+i] = c; m = 0; c = 0;
+    for (let j = n-1; j >= 0; j--) { const h = g[i*n+j]; if (h > m) { m = h; c++; } }
+    out[3*n+i] = c;
+  }
+  return out;
+}
+
+// 產生並快取某個大小的所有拉丁方陣（3×3:12 個、4×4:576 個、5×5:161280 個）
+const LATIN_CACHE = {};
+function getAllLatin(n) {
+  if (LATIN_CACHE[n]) return LATIN_CACHE[n];
+  const res = [], g = new Int8Array(n*n), rowM = Array(n).fill(0), colM = Array(n).fill(0);
+  (function rec(pos) {
+    if (pos === n*n) { const copy = g.slice(); res.push({ g: copy, c: clueVec(copy, n) }); return; }
+    const r = (pos / n) | 0, c = pos % n;
+    for (let v = 1; v <= n; v++) {
+      const bit = 1 << v;
+      if ((rowM[r] & bit) || (colM[c] & bit)) continue;
+      g[pos] = v; rowM[r] |= bit; colM[c] |= bit;
+      rec(pos + 1);
+      rowM[r] &= ~bit; colM[c] &= ~bit; g[pos] = 0;
+    }
+  })(0);
+  return (LATIN_CACHE[n] = res);
+}
+
+// 在「已知格 + 目前保留的提示」下，有幾種答案（最多數到 limit 就停）
+// 3～5：直接比對全部拉丁方陣；6～7：拉丁方陣太多（6×6 有 8 億個），改用「候選數傳遞 + 分支」
+function countSolutions(n, givens, clues, limit) {
+  if (n >= 6) return countSolutionsDFS(n, givens, clues, limit);
+  const all = getAllLatin(n);
+  const gl = givens, cl = [];
+  clues.forEach((v, i) => { if (v !== null) cl.push([i, v]); });
+  let count = 0;
+  outer: for (const sq of all) {
+    for (const [i, v] of gl) if (sq.g[i] !== v) continue outer;
+    for (const [i, v] of cl) if (sq.c[i] !== v) continue outer;
+    if (++count >= limit) break;
+  }
+  return count;
+}
+
+/* ---------- 難度評級：用「人類解題技巧」模擬解題 ----------
+   簡單(0)：每列每行不重複 + 基本提示判斷（提示 1 → 第一格最高；提示限制高度上限）
+   中等(1)：再加上「單排推演」——但只在這一排「只剩 KMED 種以內擺法」時才用（人腦列得出來）
+   困難(2)：以上都解不完，需要列舉很多擺法、假設某個數字再驗證是否矛盾（或更進階的推理）
+*/
+const GIVENS = { 3: [0,0,0], 4: [2,1,0], 5: [4,3,2], 6: [10,6,3], 7: [18,9,4] };   // 各難度預先填好的格數
+const KEEP = [0.7, 0.55, 0.3];                                                    // 各難度至少保留的提示比例
+const KMED = { 3: 4, 4: 4, 5: 4, 6: 4, 7: 4 };                                     // 中等：單排推演最多處理幾種擺法
+const _lineCache = {}, _permCache = {}, _permSub = {};
+function getLines(n) {
+  if (_lineCache[n]) return _lineCache[n];
+  const ks = [...Array(n).keys()], L = [];
+  for (let r = 0; r < n; r++) L.push({ cells: ks.map(c => r*n + c), f: 2*n + r, b: 3*n + r });
+  for (let c = 0; c < n; c++) L.push({ cells: ks.map(r => r*n + c), f: c,       b: n + c });
+  return (_lineCache[n] = L);
+}
+function getPerms(n) {
+  if (_permCache[n]) return _permCache[n];
+  const res = [];
+  (function rec(p, used) {
+    if (p.length === n) { res.push({ p, bits: p.map(v => 1 << (v - 1)), vf: countVisible(p), vb: countVisible(rev(p)) }); return; }
+    for (let v = 1; v <= n; v++) if (!(used & (1 << v))) rec(p.concat(v), used | (1 << v));
+  })([], 0);
+  return (_permCache[n] = res);
+}
+function permsFor(n, cf, cb) {                         // 符合這一排兩端提示的所有擺法（快取）
+  const k = n + ':' + cf + ':' + cb;
+  return _permSub[k] || (_permSub[k] = getPerms(n).filter(pm => (cf === null || pm.vf === cf) && (cb === null || pm.vb === cb)));
+}
+const single = m => m !== 0 && (m & (m - 1)) === 0;
+const popc = m => { let c = 0; while (m) { m &= m - 1; c++; } return c; };
+
+// 候選數傳遞。K = 單排推演最多處理幾種擺法（0 = 不用；Infinity = 不限）。回傳 false 表示出現矛盾。
+function propagate(n, cand, clues, K) {
+  const LN = getLines(n);
+  let changed, bad = false;
+  const restrict = (i, mask) => {
+    const nm = cand[i] & mask;
+    if (nm === cand[i]) return;
+    cand[i] = nm; changed = true;
+    if (nm === 0) bad = true;
+  };
+  do {
+    changed = false;
+    // ① 提示規則：提示 1 → 最近那格是最高；提示 c → 第 i 格最高不超過 n+1-c+i
+    for (const ln of LN) for (const side of [0, 1]) {
+      const c = clues[side ? ln.b : ln.f];
+      if (c === null) continue;
+      const cells = side ? rev(ln.cells) : ln.cells;
+      if (c === 1) restrict(cells[0], 1 << (n - 1));
+      for (let i = 0; i < n; i++) {
+        const maxH = n + 1 - c + i;
+        if (maxH < n) restrict(cells[i], (1 << maxH) - 1);
+      }
+    }
+    // ② 每列每行不重複：已確定的數字，從同排其他格拿掉
+    for (const ln of LN) for (const i of ln.cells) if (single(cand[i]))
+      for (const j of ln.cells) if (j !== i) restrict(j, ~cand[i]);
+    // ③ 某個數字在這一排只剩一個位置可放
+    for (const ln of LN) for (let v = 0; v < n; v++) {
+      const bit = 1 << v; let cnt = 0, at = -1;
+      for (const i of ln.cells) if (cand[i] & bit) { cnt++; at = i; }
+      if (cnt === 0) bad = true; else if (cnt === 1) restrict(at, bit);
+    }
+    // ④ 單排推演：列出這一排還可能的擺法，只留下「至少在一種擺法中出現」的數字
+    if (K > 0 && !bad) for (const ln of LN) {
+      const list = permsFor(n, clues[ln.f], clues[ln.b]), un = new Array(n).fill(0);
+      let cnt = 0;
+      for (const pm of list) {
+        let ok = true;
+        for (let i = 0; i < n; i++) if (!(cand[ln.cells[i]] & pm.bits[i])) { ok = false; break; }
+        if (!ok) continue;
+        if (++cnt > K) break;
+        for (let i = 0; i < n; i++) un[i] |= pm.bits[i];
+      }
+      if (cnt > K) continue;                           // 擺法太多，人不會去一一列舉
+      if (cnt === 0) bad = true; else for (let i = 0; i < n; i++) restrict(ln.cells[i], un[i]);
+    }
+  } while (changed && !bad);
+  return !bad;
+}
+
+// 每格都確定後，檢查是否符合所有提示
+function candSolved(n, cand, clues) {
+  const b = Array.from({length: n}, () => Array(n).fill(0));
+  for (let i = 0; i < n*n; i++) {
+    if (!single(cand[i])) return false;
+    b[(i / n) | 0][i % n] = 32 - Math.clz32(cand[i]);
+  }
+  const L = lines(b, n);
+  for (let ki = 0; ki < 4; ki++) for (let i = 0; i < n; i++) {
+    const want = clues[ki*n + i];
+    if (want !== null && countVisible(L[KEYS[ki]][i]) !== want) return false;
+  }
+  return true;
+}
+
+// 只用 tier 以內的技巧，能不能把整題解完（且答案符合所有提示）。tier 0 簡單 / 1 中等 / 2 不限
+function solveLogic(n, givens, clues, tier) {
+  const cand = new Int32Array(n*n).fill((1 << n) - 1);
+  for (const [i, v] of givens) cand[i] = 1 << (v - 1);
+  const K = tier === 0 ? 0 : tier === 1 ? KMED[n] : Infinity;
+  if (!propagate(n, cand, clues, K)) return false;
+  return candSolved(n, cand, clues);
+}
+
+// 6×6、7×7 的解數計算：傳遞到不能再推，再挑「候選最少」的格子分支
+function countSolutionsDFS(n, givens, clues, limit) {
+  const root = new Int32Array(n*n).fill((1 << n) - 1);
+  for (const [i, v] of givens) root[i] = 1 << (v - 1);
+  let count = 0;
+  (function dfs(cand) {
+    if (!propagate(n, cand, clues, Infinity)) return;
+    let at = -1, bc = 99;
+    for (let i = 0; i < n*n; i++) { const c = popc(cand[i]); if (c > 1 && c < bc) { bc = c; at = i; } }
+    if (at < 0) { if (candSolved(n, cand, clues)) count++; return; }
+    let m = cand[at];
+    while (m) {
+      const bit = m & -m; m ^= bit;
+      const c2 = cand.slice(); c2[at] = bit;
+      dfs(c2);
+      if (count >= limit) return;
+    }
+  })(root);
+  return count;
+}
+
+// 6×6、7×7：隨機產生一個拉丁方陣（逐格隨機回溯）
+function randomLatin(n) {
+  const g = new Int8Array(n*n), colUsed = new Array(n).fill(0), vals = [...Array(n).keys()].map(v => v + 1);
+  (function fill(pos, rowUsed) {
+    if (pos === n*n) return true;
+    const r = (pos / n) | 0, c = pos % n;
+    if (c === 0) rowUsed = 0;
+    for (const v of shuffle(vals)) {
+      const bit = 1 << v;
+      if ((rowUsed & bit) || (colUsed[c] & bit)) continue;
+      g[pos] = v; colUsed[c] |= bit;
+      if (fill(pos + 1, rowUsed | bit)) return true;
+      colUsed[c] &= ~bit; g[pos] = 0;
+    }
+    return false;
+  })(0, 0);
+  return { g, c: clueVec(g, n) };
+}
+
+// 評級（題目本身保證唯一解）：0 簡單 / 1 中等 / 2 困難
+function ratePuzzle(n, givens, clues) {
+  if (solveLogic(n, givens, clues, 0)) return 0;
+  if (solveLogic(n, givens, clues, 1)) return 1;
+  return 2;
+}
+
+// 出題：隨機答案 → 固定幾格 → 全部提示 → 隨機隱藏提示（保持唯一解，且不超過目標難度的技巧）
+// 若這個盤面大小出不出該難度，就退而求其次，回傳最接近的難度。
+// deterministic = true：不看時間、只看次數，同一個亂數種子一定產生同一題（每日謎題用）
+function generatePuzzle(n, tier, deterministic) {
+  const all = n <= 5 ? getAllLatin(n) : null;
+  const t0 = performance.now(), budget = n >= 6 ? 6000 : 1800;
+  let best = null;
+  for (let attempt = 0; attempt < (deterministic ? 120 : 300); attempt++) {
+    const sol = all ? all[Math.floor(RNG() * all.length)] : randomLatin(n);
+    const clues = Array.from(sol.c);                    // 長度 4n
+    const cellIdx = shuffle([...Array(n*n).keys()]).slice(0, (GIVENS[n] || [0,0,0])[tier]);
+    const givens = cellIdx.map(i => [i, sol.g[i]]);
+    if (countSolutions(n, givens, clues, 2) !== 1) continue;   // 連全部提示都不唯一的盤面不要
+    let left = 4 * n;
+    const floor = Math.ceil(4 * n * KEEP[tier]);          // 至少保留這麼多條提示，避免空格互相牽連太多
+    for (const i of shuffle([...Array(4*n).keys()])) {
+      if (left <= floor) break;
+      const keep = clues[i];
+      clues[i] = null;
+      const ok = tier === 2 ? countSolutions(n, givens, clues, 2) === 1
+                            : solveLogic(n, givens, clues, tier);
+      if (!ok) clues[i] = keep; else left--;
+    }
+    const rating = ratePuzzle(n, givens, clues);
+    const cand = { n, sol: sol.g, clues, givens, rating, requested: tier };
+    if (rating === tier) return cand;
+    if (!best || Math.abs(rating - tier) < Math.abs(best.rating - tier)) best = cand;
+    if (!deterministic && performance.now() - t0 > budget) break;
+  }
+  return best;
+}
+
+// 檢查：用規則驗證（不是比對標準答案）
+function validate(board, puzzle) {
+  const n = puzzle.n;
+  const full = board.every(r => r.every(v => v > 0));
+  const dup = Array.from({length:n}, () => Array(n).fill(false));
+  for (let i = 0; i < n; i++) for (let a = 0; a < n; a++) for (let b = a+1; b < n; b++) {
+    if (board[i][a] && board[i][a] === board[i][b]) dup[i][a] = dup[i][b] = true;
+    if (board[a][i] && board[a][i] === board[b][i]) dup[a][i] = dup[b][i] = true;
+  }
+  const L = lines(board, n), clueState = {};
+  KEYS.forEach((k, ki) => {
+    clueState[k] = L[k].map((line, i) => {
+      const want = puzzle.clues[ki*n + i];
+      if (want === null) return null;
+      if (line.some(v => v === 0)) return null;           // 還沒填完，不判斷
+      return countVisible(line) === want;
+    });
+  });
+  const anyDup = dup.some(r => r.some(Boolean));
+  const clueOk = KEYS.every(k => clueState[k].every(v => v !== false));
+  return { full, dup, clueState, win: full && !anyDup && clueOk };
+}
+
+/* ========== 遊戲狀態與畫面 ========== */
+let N = 3, TIER = 0, puzzle, board, sel = null, startTime = 0, timerId = null, finished = false, DAILY = null;
+const PR = { n: 3, t: 0 };   // 自由練習目前的盤面大小與難度
+const $ = id => document.getElementById(id);
+
+function isGiven(r, c) { return puzzle.givens.some(([i]) => i === r*N + c); }
+/* ---- 復原／重做、試探模式 ---- */
+let TENT = new Set(), TRY = false, TRYSNAP = null, HIST = [], FUT = [];
+function resetPlay() { HINTED = new Set(); WARNED = new Map(); hintN = 0; XH = 0; if (puzzle) paintHint(); TENT = new Set(); TRY = false; TRYSNAP = null; HIST = []; FUT = []; }
+const cp2 = b => b.map(r => r.slice());
+const snapState = () => ({ b: cp2(board), t: [...TENT], on: TRY, sb: TRYSNAP ? cp2(TRYSNAP) : null, h: [...HINTED] });
+function loadState(s) { board = cp2(s.b); TENT = new Set(s.t); TRY = s.on; TRYSNAP = s.sb ? cp2(s.sb) : null; HINTED = new Set(s.h); }
+function pushHist() { HIST.push(snapState()); if (HIST.length > 300) HIST.shift(); FUT.length = 0; }
+function afterChange(msg) {
+  const m = $('msg'); m.className = 'msg'; m.textContent = msg || '';
+  saveProgress(); render();
+}
+function undo() { if (finished || !HIST.length) return; FUT.push(snapState()); loadState(HIST.pop()); Music.sfx('clear'); afterChange(); }
+function redo() { if (finished || !FUT.length) return; HIST.push(snapState()); loadState(FUT.pop()); Music.sfx('set'); afterChange(); }
+function clearRed() {
+  if (finished || !puzzle) return;
+  const v = validate(board, puzzle), kill = [];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (v.dup[r][c] && !isGiven(r, c)) kill.push([r, c]);
+  const m = $('msg');
+  if (!kill.length) { m.className = 'msg'; m.textContent = '目前沒有紅色（重複）的格子'; return; }
+  pushHist(); kill.forEach(([r, c]) => { board[r][c] = 0; TENT.delete(r * N + c); HINTED.delete(r * N + c); });
+  Music.sfx('clear'); afterChange('已清除 ' + kill.length + ' 格重複的數字（按 ↶ 可以復原）');
+}
+function tryStart() { if (finished || !puzzle || TRY) return; pushHist(); TRY = true; TRYSNAP = cp2(board); Music.sfx('tap'); afterChange('試探中：現在填的數字都還不確定，確認後按「採用」，不對就按「撤回」'); }
+function tryAdopt() { if (!TRY) return; pushHist(); TENT.clear(); TRY = false; TRYSNAP = null; Music.sfx('ok'); afterChange('試探的數字已經變成確定'); }
+function tryRevert() {
+  if (!TRY) return; pushHist();
+  board = cp2(TRYSNAP); TENT.clear(); TRY = false; TRYSNAP = null; Music.sfx('clear'); afterChange('已撤回，回到試探前的盤面');
+}
+function updateTools() {
+  $('btnUndo').disabled = finished || !HIST.length; $('btnRedo').disabled = finished || !FUT.length;
+  $('btnRed').disabled = finished; $('btnTry').disabled = finished; $('btnErase').disabled = finished;
+  $('btnTry').style.display = TRY ? 'none' : ''; $('btnAdopt').style.display = $('btnRevert').style.display = TRY ? '' : 'none';
+  $('board').classList.toggle('trying', TRY);
+}
+function freshBoard() {
+  const b = Array.from({length:N}, () => Array(N).fill(0));
+  for (const [i, v] of puzzle.givens) b[(i / N) | 0][i % N] = v;
+  return b;
+}
+
+function buildPad(n) {
+  $('pad').style.setProperty('--pn', n + 1);
+  $('pad').innerHTML = [...Array(n).keys()].map(i => '<button data-n="'+(i+1)+'">'+(i+1)+'</button>').join('')
+                     + '<button data-n="0">⌫</button>';
+}
+
+const TIER_NAME = ['簡單', '中等', '困難'];
+const TIER_DESC = [
+  '只需要「每列每行不重複」和基本的外圈數字判斷，不用猜。',
+  '需要把某一排「只剩幾種」的擺法列出來比較，才推得出來（不會要你列舉一大堆）。',
+  '單排推演不夠用，需要假設某個數字再驗證是否矛盾，或更進階的推理。'
+];
+function showBadge() {
+  const shown = puzzle.clues.filter(v => v !== null).length;
+  let t = '本題難度：' + TIER_NAME[puzzle.rating];
+  if (puzzle.rating !== TIER)
+    t = N + '×' + N + ' 目前出不出「' + TIER_NAME[TIER] + '」題，已改出「' + TIER_NAME[puzzle.rating] + '」題';
+  $('badge').textContent = t + '（外圈數字 ' + shown + ' 個' + (puzzle.givens.length ? '，預填 ' + puzzle.givens.length + ' 格' : '') + '）';
+}
+
+function setLevel(n, t) {
+  N = n; TIER = t; PR.n = n; PR.t = t;
+  document.querySelectorAll('#sizes button').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+  document.querySelectorAll('#tiers button').forEach(b => b.classList.toggle('on', +b.dataset.t === t));
+  $('tierDesc').textContent = TIER_DESC[t];
+  $('sub').textContent = n + ' × ' + n + ' · 數字 1～' + n + '，每列每行不重複，外圈數字 = 該方向看到的棟數';
+  buildPad(n);
+  try { localStorage.setItem('skyscraperLevel', String(n)); localStorage.setItem('skyscraperTier', String(t)); } catch (e) {}
+  newGame();
+}
+
+function newGame() {
+  $('msg').className = 'msg'; $('msg').textContent = '出題中…';
+  $('btnReplay').style.display = 'none';
+  close3D();
+  clearInterval(timerId);
+  // 讓「出題中」先顯示出來，再做（5×5 第一次需要建表；6×6、7×7 不用建表）
+  setTimeout(() => {
+    puzzle = generatePuzzle(N, TIER);
+    showBadge();
+    resetPlay(); board = freshBoard();
+    sel = null; finished = false;
+    $('msg').textContent = '';
+    startTimer(); render();
+  }, 20);
+}
+function startTimer(offset) {
+  clearInterval(timerId); startTime = Date.now() - (offset || 0) * 1000;
+  timerId = setInterval(() => {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    $('timer').textContent = String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+  }, 500);
+  $('timer').textContent = fmt(offset || 0);
+}
+
+function render() {
+  if (!puzzle) return;
+  $('gameView').classList.toggle('fin', !!finished);   // 完成後收起數字鍵與檢查鈕，改顯示重播／重挑戰
+  const v = validate(board, puzzle);
+  updateTools();
+  const el = $('board'); el.innerHTML = '';
+  const size = N + 2, vw = window.innerWidth, vh = window.innerHeight;
+  // 格子邊長：同時受「螢幕寬度」和「棋盤下方還剩多少高度」限制，讓檢查鈕與訊息都留在同一個螢幕內
+  const tight = vw < 480 || vh < 620;
+  const gap = tight ? 4 : 6, padB = tight ? 8 : 14, K = 0.8;               // K：外圈提示格寬度 ÷ 輸入格寬度
+  const availW = Math.min(vw, 600) - (vw < 480 ? 20 : 40) - 2 * padB;
+  const sW = (availW - (N + 1) * gap) / (N + 2 * K);
+  const top = el.getBoundingClientRect().top + window.scrollY;
+  const flow = e => { const d = getComputedStyle(e).display; return d === 'contents' ? [...e.children].flatMap(flow) : d === 'none' ? [] : [e]; };
+  const gv = $('gameView'), minS = N >= 6 ? 19 : 26;
+  // 操作區（數字鍵、按鈕）的大小會跟著格子大小一起縮放，所以要「設定 → 量 → 再調」幾次，直到放得進這個螢幕
+  const fit = () => {
+    let below = 0;                                                         // 棋盤下方：訊息、數字鍵、按鈕列
+    for (let e = el.nextElementSibling; e; e = e.nextElementSibling) flow(e).forEach(x => { below += x.offsetHeight + 10; });
+    const sH = (vh - top - below - 2 * padB - (N + 1) * gap - 14) / (N + 2 * K);
+    return Math.floor(Math.max(minS, Math.min(sW, sH > 0 ? sH : sW, 64)));
+  };
+  let s = Math.floor(Math.min(sW, 64));
+  for (let i = 0; i < 4; i++) { gv.style.setProperty('--s', s + 'px'); const ns = fit(); if (ns === s) break; s = ns; }
+  gv.style.setProperty('--s', s + 'px');
+  for (let i = 0; i < 6; i++) { const ns = fit(); if (ns >= s) break; s = ns; gv.style.setProperty('--s', s + 'px'); }   // 保險：還超出就再縮
+  el.style.setProperty('--s', s + 'px');
+  el.style.gap = gap + 'px'; el.style.padding = padB + 'px';
+  const edge = Math.floor(s * K) + 'px', mid = 'repeat(' + N + ', ' + s + 'px)';
+  el.style.gridTemplateColumns = edge + ' ' + mid + ' ' + edge;
+  el.style.gridTemplateRows = edge + ' ' + mid + ' ' + edge;
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+    const d = document.createElement('div');
+    const inner = r>=1 && r<=N && c>=1 && c<=N;
+    const corner = (r===0||r===size-1) && (c===0||c===size-1);
+    if (corner) { el.appendChild(d); continue; }
+    if (inner) {
+      const rr = r-1, cc = c-1, val = board[rr][cc], given = isGiven(rr, cc);
+      d.className = 'cell' + (val ? ' h'+val : '') + (given ? ' given' : '') + (HINTED.has(rr*N + cc) ? ' hinted' : '') + (WARNED.get(rr*N + cc) === val && val ? ' warn' : '') + (TENT.has(rr*N + cc) ? ' tent' : '')
+                  + (v.dup[rr][cc] ? ' dup' : '')
+                  + (sel && sel[0]===rr && sel[1]===cc ? ' sel' : '');
+      d.textContent = val || '';
+      d.onclick = () => { sel = [rr, cc]; Music.sfx('tap'); render(); };
+    } else {
+      let ki, idx;
+      if (r === 0) { ki = 0; idx = c-1; }
+      else if (r === size-1) { ki = 1; idx = c-1; }
+      else if (c === 0) { ki = 2; idx = r-1; }
+      else { ki = 3; idx = r-1; }
+      const key = KEYS[ki], val = puzzle.clues[ki*N + idx], st = v.clueState[key][idx];
+      d.className = 'clue' + (st === true ? ' ok' : st === false ? ' bad' : '');
+      if (val !== null) d.innerHTML = val + '<small>' + ARROW[key] + '</small>';
+    }
+    el.appendChild(d);
+  }
+}
+
+/* ---- 提示：玩家先點一格，再按提示鈕，就告訴你這一格的答案（每次加 30 秒）
+   ・次數依空格數比例給（約 15%），中等 +1、困難 +2
+   ・用完後可輸入密碼解鎖，之後不限次數 ---- */
+const HINT_COST = 30, HINT_COST_XTRA = 90, HINT_COST_WARN = 15, HINT_RATIO = 0.15, HINT_BONUS = [0, 1, 2];
+let HINTED = new Set(), hintN = 0, XH = 0, HINT_ALL = false, WARNED = new Map();   // WARNED：已被提示「這格不對」的格子 → 當時填的數字
+try { HINT_ALL = sessionStorage.getItem('skyscraperHintAll') === '1'; } catch (e) {}
+function hintQuota() {
+  const E = N * N - puzzle.givens.length;
+  return Math.max(2, Math.round(E * HINT_RATIO)) + (HINT_BONUS[puzzle.rating] || 0);
+}
+function paintHint() {
+  const b = $('btnHint'); if (!b || !puzzle) return;
+  const left = hintQuota() - hintN;
+  const c = $('hintCnt'); if (!c) return;
+  c.innerHTML = HINT_ALL ? '∞' : left > 0 ? left : ic('lock'); c.classList.toggle('zero', !HINT_ALL && left <= 0);
+}
+function hintMsg(t, bad) { $('msg').className = 'msg' + (bad ? ' bad' : ''); $('msg').textContent = t; }
+function giveHint(force) {
+  if (finished || !puzzle) return;
+  const sol = puzzle.sol, n = N;
+  if (!sel) { hintMsg('先點一格想知道答案的空格，再按「提示」', true); return; }
+  const r = sel[0], c = sel[1], at = r * n + c;
+  if (isGiven(r, c)) { hintMsg('這一格是題目給的，不用提示', true); return; }
+  if (board[r][c] === sol[at]) { hintMsg('這一格已經填對了，換一格試試', true); return; }
+  const wrong = board[r][c] && board[r][c] !== sol[at];
+  if (wrong && WARNED.get(at) !== board[r][c]) {            // 第一段：只指出「這格不對」，不扣次數、不給答案
+    WARNED.set(at, board[r][c]); startTime -= HINT_COST_WARN * 1000;
+    hintMsg('第 ' + (r + 1) + ' 列第 ' + (c + 1) + ' 行的數字不對，再想想看；真的卡住就再按一次提示，會告訴你答案（+' + HINT_COST_WARN + ' 秒）', true);
+    Music.sfx('bad'); saveProgress(); render(); return;
+  }
+  const free = HINT_ALL || hintN < hintQuota();
+  if (!free && force !== 'extra') { askHintPw(); return; }
+  const xtra = !free, cost = xtra ? HINT_COST_XTRA : HINT_COST;
+  if (xtra) { XH++; $('pwBox').classList.remove('show'); }
+  // 說明這格是用哪一類推理得到的（只用「已填對」的格子來推）
+  const base = new Int32Array(n * n).fill((1 << n) - 1);
+  for (let i = 0; i < n * n; i++) { const v = board[(i / n) | 0][i % n]; if (v && v === sol[i]) base[i] = 1 << (v - 1); }
+  let why = '直接告訴你這一格的答案';
+  for (const [K, txt] of [[0, '只用「每列每行不重複」和外圈數字就能確定'], [KMED[n], '把這一排「只剩幾種」擺法列出來比較，就能確定'], [Infinity, '需要更深的推理（把一排所有擺法列出來比較）']]) {
+    const cand = base.slice();
+    if (propagate(n, cand, puzzle.clues, K) && single(cand[at])) { why = txt; break; }
+  }
+  pushHist();
+  board[r][c] = sol[at]; HINTED.add(at); TENT.delete(at); hintN++; startTime -= cost * 1000;
+  if (TRY && TRYSNAP) TRYSNAP[r][c] = sol[at];            // 提示給的是正確答案：撤回試探時要保留
+  hintMsg('第 ' + (r + 1) + ' 列第 ' + (c + 1) + ' 行是 ' + sol[at] + '：' + why + '（+' + cost + ' 秒' + (xtra && DAILY ? '，本題星星最高 1 顆' : '') + '）');
+  Music.sfx('set'); saveProgress(); paintHint(); render();
+}
+let pwBad = 0, pwFail = 0, pwLockUntil = 0;
+const HINT_PASSWORD = 'sky2026';
+function askHintPw() {
+  pwBad = 0; $('pwErr').textContent = ''; $('pwIn').value = '';
+  $('pwExtraSub').textContent = '+' + HINT_COST_XTRA + ' 秒' + (DAILY ? '，本題星星最高 1 顆' : '');
+  $('pwBox').classList.add('show');
+}
+function submitHintPw() {
+  const pw = $('pwIn').value.trim(); if (!pw) return;
+  const ok = () => { HINT_ALL = true; try { sessionStorage.setItem('skyscraperHintAll', '1'); } catch (e) {} $('pwBox').classList.remove('show'); paintHint(); toast('已解鎖：提示不限次數'); giveHint(); };
+  const bad = r => {
+    Music.sfx('bad'); $('pwIn').select();
+    if (r && r.wait) $('pwErr').textContent = '嘗試太多次了，請等 ' + r.wait + ' 秒再試。現在也可以先用上面的「額外提示」。';
+    else { pwBad++; $('pwErr').textContent = pwBad >= 2 ? '通行碼不太對。通行碼由老師／管理者提供，沒有的話，用上面的「額外提示」就可以繼續。' : '通行碼不太對，再試一次吧'; }
+  };
+  const nowMs = Date.now();
+  if (pwLockUntil > nowMs) { bad({ wait: Math.ceil((pwLockUntil - nowMs) / 1000) }); return; }
+  if (pw.toLowerCase() === HINT_PASSWORD.toLowerCase()) { pwFail = 0; ok(); }
+  else { pwFail++; if (pwFail >= 5) { pwLockUntil = nowMs + 60000; pwFail = 0; bad({ wait: 60 }); } else bad({}); }
+}
+function setValue(n) {
+  if (!sel || finished || !puzzle) return;
+  if (isGiven(sel[0], sel[1])) return;                 // 預填的格子不能改
+  const idx = sel[0] * N + sel[1];
+  if (board[sel[0]][sel[1]] === n) return;
+  pushHist();
+  board[sel[0]][sel[1]] = n; HINTED.delete(idx);
+  if (TRY && n) TENT.add(idx); else TENT.delete(idx);   // 試探中填的數字標成「不確定」
+  Music.sfx(n ? 'set' : 'clear');
+  $('msg').textContent = ''; $('msg').className = 'msg';
+  saveProgress();
+  render();
+}
+function check() {
+  if (finished || !puzzle) return;
+  const v = validate(board, puzzle), m = $('msg');
+  if (TRY || TENT.size) { m.textContent = '還有試探中的數字，請先按「採用」或「撤回」'; m.className = 'msg bad'; Music.sfx('bad'); return; }
+  if (v.win) {
+    finished = true; clearInterval(timerId); render();
+    m.textContent = '恭喜過關！用時 ' + $('timer').textContent; m.className = 'msg ok';
+    $('btnReplay').style.display = '';
+    Music.sfx('ok');
+    $('winNote').textContent = DAILY ? onDailyWin() : '';     // 必須在 open3D 之前
+    $('hubLink').hidden = !(DAILY && DAILY.key === CAL.today);
+    if (DAILY) $('btnRetry').style.display = '';
+    open3D();
+  } else if (!v.full) {
+    m.textContent = '還有格子沒填完喔'; m.className = 'msg bad'; Music.sfx('bad');
+  } else {
+    m.textContent = '有地方不對，紅色部分請再檢查'; m.className = 'msg bad'; Music.sfx('bad');
+  }
+}
+
+$('pad').onclick = e => { const b = e.target.closest('button'); if (b) setValue(+b.dataset.n); };
+$('sizes').onclick = e => { const b = e.target.closest('button'); if (b && +b.dataset.n !== N) setLevel(+b.dataset.n, TIER); };
+$('tiers').onclick = e => { const b = e.target.closest('button'); if (b && +b.dataset.t !== TIER) setLevel(N, +b.dataset.t); };
+$('btnCheck').onclick = check;
+$('btnNew').onclick = newGame;
+$('btnHint').onclick = () => giveHint();
+$('pwOk').onclick = submitHintPw;
+$('pwCancel').onclick = () => $('pwBox').classList.remove('show');
+$('pwExtra').onclick = () => giveHint('extra');
+$('pwIn').onkeydown = e => { if (e.key === 'Enter') submitHintPw(); else if (e.key === 'Escape') $('pwBox').classList.remove('show'); e.stopPropagation(); };
+$('btnClear').onclick = () => { if (finished || !puzzle) return; pushHist(); Music.sfx('clear'); board = freshBoard(); TENT = new Set(); TRY = false; TRYSNAP = null; HINTED = new Set(); afterChange('已清空（按 ↶ 可以復原）'); };
+readTheme(); paintTheme();
+$('btnTheme').onclick = $('btnTheme2').onclick = () => { toggleTheme(); closeMenu(); };
+function closeMenu() { $('moreMenu').classList.remove('show'); $('btnMore').setAttribute('aria-expanded', 'false'); }
+$('btnMore').onclick = e => { e.stopPropagation(); const o = $('moreMenu').classList.toggle('show'); $('btnMore').setAttribute('aria-expanded', o ? 'true' : 'false'); };
+$('moreMenu').addEventListener('click', e => { if (e.target.closest('button')) closeMenu(); });
+document.addEventListener('click', e => { if (!e.target.closest('.morewrap')) closeMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+$('btnErase').onclick = () => { if (!sel) { hintMsg('先點一格，再按橡皮擦', true); return; } setValue(0); };
+$('btnUndo').onclick = undo; $('btnRedo').onclick = redo; $('btnRed').onclick = clearRed;
+$('btnTry').onclick = tryStart; $('btnAdopt').onclick = tryAdopt; $('btnRevert').onclick = tryRevert;
+document.addEventListener('keydown', e => {
+  if ($('gameView').style.display === 'none') return;
+  if ($('win').classList.contains('show')) { if (e.key === 'Escape') close3D(); return; }
+  if ($('tutorial').classList.contains('show')) return;
+  if (e.key >= '1' && e.key <= String(N)) setValue(+e.key);
+  else if (['0','Backspace','Delete'].includes(e.key)) setValue(0);
+  else if (e.key === 'Enter') check();
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
+  else if (e.key === 'z' || e.key === 'Z') undo();
+  else if (e.key === 'y' || e.key === 'Y') redo();
+  else if (e.key === 't' || e.key === 'T') tryStart();
+  else if (sel) {
+    const mv = { ArrowUp:[-1,0], ArrowDown:[1,0], ArrowLeft:[0,-1], ArrowRight:[0,1] }[e.key];
+    if (mv) { e.preventDefault(); sel = [(sel[0]+mv[0]+N)%N, (sel[1]+mv[1]+N)%N]; Music.sfx('tap'); render(); }
+  }
+});
+
+/* ========== 教學 ========== */
+// 畫一排大樓，標出兩端提示；可見的大樓橘色，被擋住的灰色
+function demoRow(row, showLeft, showRight) {
+  const seen = (line) => { let m = 0; return line.map(h => (h > m ? (m = h, true) : false)); };
+  const vl = seen(row), vr = rev(seen(rev(row)));
+  const towers = row.map((h, i) => {
+    const visible = (showLeft && vl[i]) || (showRight && vr[i]);
+    return '<div class="tower ' + (visible ? 'v' : 'hid') + '" style="height:' + (h*34) + 'px">' + h + '</div>';
+  }).join('');
+  const side = (on, line) => '<div class="side">' + (on ? countVisible(line) + '<small>看到</small>' : '') + '</div>';
+  return '<div class="demo">' + side(showLeft, row) + towers + side(showRight, rev(row)) + '</div>'
+       + '<div class="legend"><b class="v">橘色</b>＝看得到　<b class="h">灰色</b>＝被擋住</div>';
+}
+
+const STEPS = [
+  { title: '歡迎來到發現大樓',
+    demo: () => demoRow([2,1,3], true, true).replace(/<div class="legend">.*<\/div>/, ''),
+    body: '<p>每個方格都是一棟大樓，高度從 <b>1 到盤面大小</b>（3×3 就是 1～3，7×7 就是 1～7）。</p><p>每一列、每一行的數字<b>不能重複</b>，就像數獨一樣。</p>' },
+  { title: '從外面看過去',
+    demo: () => demoRow([2,1,3], true, false),
+    body: '<p>格子<b>外面的數字</b>，代表從那個方向往裡看，<b>能看到幾棟大樓</b>。</p><p>矮的大樓會被前面的高樓擋住。上圖由左往右看：2 先出現、1 被擋住、3 又比 2 高，所以看到 <b>2 棟</b>。</p>' },
+  { title: '換個方向就不同',
+    demo: () => demoRow([2,1,3], false, true),
+    body: '<p>同一排，從<b>右邊</b>看：先看到最高的 3，後面全被擋住，所以只看到 <b>1 棟</b>。</p><p>外圈數字旁的箭頭 ↓ ↑ → ← 就是告訴你看的方向。</p>' },
+  { title: '解題小技巧',
+    demo: () => demoRow([1,2,3], true, false),
+    body: '<ul style="line-height:1.8;padding-left:20px"><li>外圈數字等於盤面大小（如 3×3 的 3）：這排一定由矮到高排好。</li><li>外圈數字是 <b>1</b>：最靠近你的那格一定是<b>最高的樓</b>。</li><li>顏色較深、有粗框的格子是<b>題目預先給好的</b>，不能修改。</li><li>先填最確定的，再用「每列每行不重複」慢慢推理。</li></ul>' },
+  { title: '每日月曆',
+    demo: () => '<div class="demo" style="height:auto;font-size:36px;gap:14px;color:var(--blue)">' + ic('calendar') + ic('arrow') + ic('building') + ic('arrow') + ic('unlock') + '</div>',
+    body: '<ul style="line-height:1.8;padding-left:20px"><li>每天一題，盤面大小與難度由系統排程隨機決定。</li><li>點月曆上的封面，揭開當天的謎題。</li><li>在<b>目標時間</b>內解出今日謎題（達標），才能解鎖<b>過期謎題</b>。</li><li>過期謎題在目標時間內完成可得 ★。</li></ul>' },
+  { title: '怎麼操作？',
+    demo: () => '<div class="demo" style="height:auto;gap:8px"><div class="cell h2" style="width:48px;height:48px">2</div><div class="cell h2 dup" style="width:48px;height:48px">2</div><div class="clue ok" style="width:48px;height:48px">3<small>→</small></div></div>',
+    body: '<p>① 點選格子，再按下方的數字（電腦也可用鍵盤與方向鍵）。</p><p>② 同列或同行重複時，格子會變<b style="color:#d64545">紅色</b>。</p><p>③ 外圈數字條件滿足時，會變<b style="color:#2e9e5b">綠色</b>。</p><p>④ 全部填好後按「檢查答案」。填錯了可按「復原」或「清紅格」；不確定的數字先按「試探」再填（藍色虛線），對了按「採用」，不對按「撤回」。卡關時可按「提示」（每次加 30 秒）。上方可選盤面大小（3×3～7×7）與難度（簡單／中等／困難）。準備好了嗎？</p>' }
+];
+let step = 0;
+function showStep() {
+  const s = STEPS[step];
+  $('tTitle').textContent = s.title;
+  $('tDemo').innerHTML = s.demo();
+  $('tBody').innerHTML = s.body;
+  $('tDots').innerHTML = STEPS.map((_, i) => '<i class="' + (i === step ? 'on' : '') + '"></i>').join('');
+  $('tPrev').style.visibility = step === 0 ? 'hidden' : 'visible';
+  $('tNext').textContent = step === STEPS.length - 1 ? '開始遊戲！' : '下一步';
+}
+function openTutorial() { step = 0; showStep(); $('tutorial').classList.add('show'); }
+function closeTutorial() { $('tutorial').classList.remove('show'); }
+$('tNext').onclick = () => { if (step < STEPS.length - 1) { step++; showStep(); } else closeTutorial(); };
+$('tPrev').onclick = () => { if (step > 0) { step--; showStep(); } };
+$('tSkip').onclick = closeTutorial;
+$('btnHelp').onclick = openTutorial;
+
+/* ========== 過關 3D（偽 3D 等角投影）動畫 ========== */
+const HCOL = { 1:[59,143,207], 2:[76,175,110], 3:[224,166,58], 4:[201,112,95], 5:[138,99,196], 6:[34,160,170], 7:[222,100,160] };
+const FRAME = [232, 228, 218], FRAME_D = [196, 190, 178], STEEL = [92, 98, 108];   // 大樓外框：暖白色；玻璃顏色依樓高
+const rgb = (c, k) => 'rgb(' + c.map(v => Math.max(0, Math.min(255, Math.round(v*k)))).join(',') + ')';
+const W3 = { open:false, raf:0, yaw:Math.PI/4, target:Math.PI/4, pitch:0.61, auto:true,
+             t0:0, last:0, w:0, h:0, n:3, towers:[], clues:null, total:0 };
+const cv = $('c3d'), cx2 = cv.getContext('2d');
+
+function sizeCanvas() {
+  // 手機盡量用滿寬度；電腦不要太大，也不要超出螢幕高度
+  const w = Math.round(Math.max(240, Math.min(window.innerWidth - (window.innerWidth < 500 ? 36 : 72), 460, (window.innerHeight - 270) / 0.95)));
+  const h = Math.round(w * 0.95), dpr = window.devicePixelRatio || 1;
+  cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  cv.width = w * dpr; cv.height = h * dpr;
+  cx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  W3.w = w; W3.h = h;
+}
+
+function open3D() {
+  const n = N, b = board.map(r => r.slice());
+  W3.n = n;
+  // 從最終盤面算出四邊「實際看到的棟數」
+  const L = lines(b, n);
+  W3.clues = {}; KEYS.forEach(k => W3.clues[k] = L[k].map(countVisible));
+  // 排程：由矮到高，一棟棟長出來
+  const towers = [];
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++)
+    towers.push({ h: b[r][c], x: c - n/2 + 0.5, y: n/2 - r - 0.5, start: 0, dur: 0 });
+  let t = 350, total = 0;
+  for (let h = 1; h <= n; h++) {
+    const g = shuffle(towers.filter(tw => tw.h === h));
+    g.forEach((tw, i) => { tw.start = t + i * 170; tw.dur = 500 + 240 * h; total = Math.max(total, tw.start + tw.dur); });
+    t += g.length * 170 + 380;
+  }
+  W3.towers = towers; W3.total = total;
+  W3.yaw = W3.target = Math.PI / 4; W3.pitch = 0.61; W3.auto = true;
+  $('w3Auto').classList.add('on');
+  $('winTime').textContent = '  用時 ' + $('timer').textContent;
+  $('w3New').textContent = DAILY ? '回月曆' : '再來一題';
+  $('w3Retry').style.display = DAILY ? '' : 'none';
+  $('win').classList.add('show'); Music.duck(true);
+  sizeCanvas();
+  W3.open = true; W3.t0 = W3.last = performance.now(); scoreStart();
+  cancelAnimationFrame(W3.raf); W3.raf = requestAnimationFrame(frame3D);
+}
+function close3D() {
+  W3.open = false; cancelAnimationFrame(W3.raf); Music.scoreStop();
+  $('win').classList.remove('show'); Music.duck(false);
+}
+
+const ease = p => 1 - Math.pow(1 - p, 3);
+
+function frame3D(now) {
+  if (!W3.open) return;
+  const dt = Math.min(50, now - W3.last); W3.last = now;
+  if (W3.auto) W3.target += dt * 0.00015;                         // 自動旋轉：約 42 秒轉一圈
+  W3.yaw += (W3.target - W3.yaw) * Math.min(1, dt * 0.005);       // 轉 90° 時的緩動也放慢
+  const el = now - W3.t0;
+  draw3D(el);
+  W3.raf = requestAnimationFrame(frame3D);
+}
+
+function draw3D(el) {
+  const n = W3.n, w = W3.w, h = W3.h, g = cx2;
+  const S = (w * 0.42) / ((n/2 + 0.9) * 1.414), cx = w / 2, cy = h * 0.72;
+  const ct = Math.cos(W3.yaw), st = Math.sin(W3.yaw), sp = Math.sin(W3.pitch), cp = Math.cos(W3.pitch);
+  const P = (x, y, z) => {
+    const xr = x * ct - y * st, yr = x * st + y * ct;
+    return { sx: cx + xr * S, sy: cy - (yr * sp + z * cp) * S, d: yr };
+  };
+  g.clearRect(0, 0, w, h);
+
+  // 地板：一塊有厚度的底座，大樓之間留有空隙
+  const h2 = n / 2, f = h2 + 0.12, T = 0.22;
+  const slabFaces = [
+    { nx: 1, ny: 0, a:[f,-f], b:[f,f] }, { nx:-1, ny: 0, a:[-f,-f], b:[-f,f] },
+    { nx: 0, ny: 1, a:[-f,f], b:[f,f] }, { nx: 0, ny:-1, a:[-f,-f], b:[f,-f] }
+  ];
+  for (const fc of slabFaces) {
+    if (fc.nx * st + fc.ny * ct >= -0.001) continue;
+    const k = 0.78 + 0.14 * (fc.nx * ct - fc.ny * st);
+    const q = [P(fc.a[0], fc.a[1], 0), P(fc.b[0], fc.b[1], 0), P(fc.b[0], fc.b[1], -T), P(fc.a[0], fc.a[1], -T)];
+    g.beginPath(); q.forEach((p, i) => i ? g.lineTo(p.sx, p.sy) : g.moveTo(p.sx, p.sy)); g.closePath();
+    g.fillStyle = rgb(TH.slab, k); g.fill(); g.strokeStyle = 'rgba(0,0,0,.28)'; g.lineWidth = 1; g.stroke();
+  }
+  const fl = [P(-f,-f,0), P(f,-f,0), P(f,f,0), P(-f,f,0)];
+  g.beginPath(); fl.forEach((p, i) => i ? g.lineTo(p.sx, p.sy) : g.moveTo(p.sx, p.sy)); g.closePath();
+  g.fillStyle = TH.floor; g.fill(); g.strokeStyle = TH.floorLine; g.lineWidth = 2; g.stroke();
+  g.strokeStyle = TH.floorGrid; g.lineWidth = 1;
+  for (let i = 1; i < n; i++) {
+    const a = P(-h2 + i, -h2, 0), b = P(-h2 + i, h2, 0), c = P(-h2, -h2 + i, 0), d = P(h2, -h2 + i, 0);
+    g.beginPath(); g.moveTo(a.sx, a.sy); g.lineTo(b.sx, b.sy); g.moveTo(c.sx, c.sy); g.lineTo(d.sx, d.sy); g.stroke();
+  }
+
+  // 要繪製的物件：大樓 + 四邊提示圓點，依深度由遠到近
+  const items = [];
+  for (const tw of W3.towers) items.push({ type:'t', tw, d: P(tw.x, tw.y, 0).d });
+  const m = 0.75;
+  for (let i = 0; i < n; i++) {
+    const pos = (i2) => i2 - n/2 + 0.5, posR = (i2) => n/2 - i2 - 0.5;
+    const c = [
+      ['top',    pos(i),  n/2 + m, '↓'],
+      ['bottom', pos(i), -n/2 - m, '↑'],
+      ['left',  -n/2 - m, posR(i), '→'],
+      ['right',  n/2 + m, posR(i), '←']
+    ];
+    for (const [k, x, y] of c) items.push({ type:'c', x, y, v: W3.clues[k][i], d: P(x, y, 0).d });
+  }
+  items.sort((a, b) => b.d - a.d);
+
+  for (const it of items) {
+    if (it.type === 'c') {
+      const p = P(it.x, it.y, 0);
+      g.beginPath(); g.arc(p.sx, p.sy, S * 0.3, 0, 7);
+      g.fillStyle = TH.chip; g.fill(); g.strokeStyle = TH.chipInk; g.lineWidth = 2; g.stroke();
+      g.fillStyle = TH.chipInk; g.font = '800 ' + Math.round(S * 0.38) + 'px sans-serif';
+      g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(it.v, p.sx, p.sy + 1);
+      continue;
+    }
+    const tw = it.tw, prog = Math.max(0, Math.min(1, (el - tw.start) / tw.dur));
+    if (prog <= 0) continue;
+    const col = HCOL[tw.h] || HCOL[5];
+    const HALF = 0.34;                                   // 大樓底面比格子小，樓與樓之間留出空隙
+    const SH = [1.0, 0.84, 0.66, 0.76];
+    const FS = [{ nx: 1, ny: 0 }, { nx: 0, ny: 1 }, { nx: -1, ny: 0 }, { nx: 0, ny: -1 }];
+    const vis = FS.map((f, i) => ({ nx: f.nx, ny: f.ny, sh: SH[i] })).filter(f => f.nx * st + f.ny * ct < -0.001);
+    // 面上的點：u 沿切線 0..1、v 由 z0 到 z1（hh = 半寬）
+    const fpt = (f, hh, z0, z1, u, v) => {
+      const k = (2 * u - 1) * hh;
+      return P(tw.x + f.nx * hh - f.ny * k, tw.y + f.ny * hh + f.nx * k, z0 + (z1 - z0) * v);
+    };
+    const fillPoly = (pts, fill, stroke, lw) => {
+      g.beginPath(); pts.forEach((q, i) => i ? g.lineTo(q.sx, q.sy) : g.moveTo(q.sx, q.sy)); g.closePath();
+      if (fill) { g.fillStyle = fill; g.fill(); } if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw || 1; g.stroke(); }
+    };
+    const plate = (hh, z0, z1, c, topC) => {            // 一塊矮方板（樓板／屋頂）
+      for (const f of vis) fillPoly([fpt(f,hh,z0,z1,0,0), fpt(f,hh,z0,z1,1,0), fpt(f,hh,z0,z1,1,1), fpt(f,hh,z0,z1,0,1)], rgb(c, f.sh), rgb(c, f.sh * .75), 1);
+      fillPoly([P(tw.x-hh,tw.y-hh,z1), P(tw.x+hh,tw.y-hh,z1), P(tw.x+hh,tw.y+hh,z1), P(tw.x-hh,tw.y+hh,z1)], rgb(topC || c, 1.03), rgb(c, .7), 1);
+    };
+    const fstep = tw.dur * 0.7 / tw.h, fdur = tw.dur - (tw.h - 1) * fstep;   // 一層一層由低往高「長」出來
+    const fprog = L => Math.max(0, Math.min(1, (el - tw.start - L * fstep) / fdur));
+    for (let L = 0; L < tw.h; L++) {
+      const pL = fprog(L); if (pL <= 0) continue;
+      const hg = Math.max(0.02, ease(pL)), z0 = L, z1 = L + hg, a = z0 + 0.1 * Math.min(1, hg * 4);
+      plate(HALF + 0.04, z0, a, FRAME_D, FRAME);
+      for (const f of vis) {
+        fillPoly([fpt(f,HALF,a,z1,0,0), fpt(f,HALF,a,z1,1,0), fpt(f,HALF,a,z1,1,1), fpt(f,HALF,a,z1,0,1)], rgb(FRAME, f.sh), rgb(FRAME_D, f.sh), 1);
+        [[0.1, 0.47], [0.53, 0.9]].forEach(([u0, u1], k) => {         // 左右兩扇玻璃，各有十字窗框
+          const pts = [fpt(f,HALF,a,z1,u0,.1), fpt(f,HALF,a,z1,u1,.1), fpt(f,HALF,a,z1,u1,.92), fpt(f,HALF,a,z1,u0,.92)];
+          const gr = g.createLinearGradient(pts[3].sx, pts[3].sy, pts[1].sx, pts[1].sy);
+          gr.addColorStop(0, rgb(col, f.sh * 1.18)); gr.addColorStop(1, rgb(col, f.sh * .72));
+          fillPoly(pts, gr, rgb(STEEL, f.sh), 1);
+          const mu = (u0 + u1) / 2, l = fpt(f,HALF,a,z1,u0,.5), r = fpt(f,HALF,a,z1,u1,.5), tp2 = fpt(f,HALF,a,z1,mu,.1), bt = fpt(f,HALF,a,z1,mu,.92);
+          g.strokeStyle = rgb(STEEL, f.sh); g.lineWidth = Math.max(1, S * 0.02);
+          g.beginPath(); g.moveTo(l.sx, l.sy); g.lineTo(r.sx, r.sy); g.moveTo(tp2.sx, tp2.sy); g.lineTo(bt.sx, bt.sy); g.stroke();
+          const ph = ((el * 0.00028 + k * 0.07 + z0 * 0.05 + f.nx * 0.2) % 1.6) - 0.3, s0 = u0 + (u1 - u0) * ph, w2 = (u1 - u0) * 0.22, sh = (u1 - u0) * 0.35;
+          g.save(); g.beginPath(); pts.forEach((q, i) => i ? g.lineTo(q.sx, q.sy) : g.moveTo(q.sx, q.sy)); g.closePath(); g.clip();   // 掃過的反光
+          fillPoly([fpt(f,HALF,a,z1,s0,0), fpt(f,HALF,a,z1,s0+w2,0), fpt(f,HALF,a,z1,s0+w2+sh,1), fpt(f,HALF,a,z1,s0+sh,1)], 'rgba(255,255,255,.22)');
+          g.restore();
+        });
+      }
+      if (pL >= 1) {                                    // 長到位的瞬間：白光描邊
+        const fa = Math.max(0, 1 - (el - tw.start - L * fstep - fdur) / 300);
+        if (fa > 0) { const e2 = HALF + 0.04; g.save(); g.globalAlpha = fa * .8; g.strokeStyle = '#fff'; g.lineWidth = 2;
+          fillPoly([P(tw.x-e2,tw.y-e2,a), P(tw.x+e2,tw.y-e2,a), P(tw.x+e2,tw.y+e2,a), P(tw.x-e2,tw.y+e2,a)], null, '#fff', 2); g.restore(); }
+      }
+    }
+    // 屋頂板：等最後一層開始長出才出現，並跟著最頂層一起升高
+    const pTop = fprog(tw.h - 1);
+    if (pTop > 0) {
+      const zr = tw.h - 1 + ease(pTop);
+      plate(HALF + 0.05, zr, zr + 0.12, FRAME_D, [244, 240, 232]);
+      if (tw.h === n) {                                 // 最高的樓：小頂蓋 + 天線
+        plate(0.22, zr + 0.12, zr + 0.28, FRAME_D, FRAME);
+        const base = zr + 0.28, apex = base + 0.28, s2 = 0.22;
+        for (const f of vis) fillPoly([P(tw.x + f.nx*s2 - f.ny*s2, tw.y + f.ny*s2 + f.nx*s2, base), P(tw.x + f.nx*s2 + f.ny*s2, tw.y + f.ny*s2 - f.nx*s2, base), P(tw.x, tw.y, apex)], rgb(FRAME, f.sh), rgb(FRAME_D, f.sh), 1);
+        const sp2 = ease(Math.max(0, Math.min(1, (el - tw.start - tw.dur) / 700)));
+        if (sp2 > 0) {
+          const A = P(tw.x, tw.y, apex), B = P(tw.x, tw.y, apex + 0.8 * sp2);
+          g.strokeStyle = '#4a5360'; g.lineWidth = Math.max(1.5, S * 0.035); g.lineCap = 'round';
+          g.beginPath(); g.moveTo(A.sx, A.sy); g.lineTo(B.sx, B.sy); g.stroke();
+          if (sp2 >= 1) { const bl = .55 + .45 * Math.sin(el * 0.006);
+            g.fillStyle = 'rgba(255,60,50,' + (.3 + .2 * bl) + ')'; g.beginPath(); g.arc(B.sx, B.sy, S * .12 * bl + 2, 0, 7); g.fill();
+            g.fillStyle = '#ff3b30'; g.beginPath(); g.arc(B.sx, B.sy, Math.max(2, S * .05), 0, 7); g.fill(); }
+        }
+      } else if (prog > 0.75) {                         // 其他樓：屋頂板上浮現高度數字
+        const c = P(tw.x, tw.y, zr + 0.12);
+        g.globalAlpha = Math.min(1, (prog - 0.75) / 0.25);
+        g.fillStyle = rgb(col, .75); g.font = '800 ' + Math.round(S * 0.36) + 'px sans-serif';
+        g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(tw.h, c.sx, c.sy + 1);
+        g.globalAlpha = 1;
+      }
+    }
+  }
+}
+
+// 互動：拖曳旋轉
+(() => {
+  let drag = null;
+  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; cv.setPointerCapture(e.pointerId);
+    W3.auto = false; $('w3Auto').classList.remove('on'); });
+  cv.addEventListener('pointermove', e => {
+    if (!drag) return;
+    W3.target += (e.clientX - drag.x) * 0.012; W3.yaw = W3.target;
+    W3.pitch = Math.max(0.3, Math.min(1.15, W3.pitch + (e.clientY - drag.y) * 0.006));
+    drag = { x: e.clientX, y: e.clientY };
+  });
+  const end = () => { drag = null; };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+})();
+$('w3L').onclick = () => { W3.auto = false; $('w3Auto').classList.remove('on'); W3.target -= Math.PI / 2; };
+$('w3R').onclick = () => { W3.auto = false; $('w3Auto').classList.remove('on'); W3.target += Math.PI / 2; };
+$('w3Auto').onclick = () => { W3.auto = !W3.auto; $('w3Auto').classList.toggle('on', W3.auto); };
+// 通關音階：同高度的大樓共用一個長音，起訖與大樓長出來的時間完全一致（用音訊時鐘排程）
+function scoreStart() {
+  const gs = {};
+  W3.towers.forEach(tw => { const g = gs[tw.h] || (gs[tw.h] = { h: tw.h, s: 1e9, e: 0 }); g.s = Math.min(g.s, tw.start); g.e = Math.max(g.e, tw.start + tw.dur); });
+  Music.score(Object.values(gs), W3.total);
+}
+$('w3Replay').onclick = () => { W3.t0 = performance.now(); scoreStart(); };
+$('w3Close').onclick = close3D;
+$('w3New').onclick = () => { close3D(); if (DAILY) goHome(); else newGame(); };
+$('btnReplay').onclick = open3D;
+window.addEventListener('resize', () => {
+  if (W3.open) sizeCanvas();
+  if (puzzle && $('gameView').style.display !== 'none') render();      // 轉向或調整視窗時重新算格子大小
+  if (CAL.today) fitCalendar();
+});
+
+/* ========== 每日月曆 ========== */
+const START = '2026-11-01';                                   // 第一天
+// 每日排程可抽到的 [盤面大小, 難度, 權重]（3×3 出不出「困難」，所以不排）
+const COMBOS = [[3,0,2],[3,1,2],[4,0,2],[4,1,3],[4,2,2],[5,0,1],[5,1,2],[5,2,1],[6,0,1],[6,1,1],[6,2,1],[7,1,1],[7,2,1]];
+// 達標：在目標時間（秒）內解出。PAR[盤面大小][難度]
+const PAR = { 3:[120,180,300], 4:[180,300,480], 5:[360,540,900], 6:[540,840,1320], 7:[780,1200,1800] };
+const REC_KEY = 'skyscraperDaily';
+const pad2 = v => String(v).padStart(2, '0');
+const fmt = s => pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
+const keyOf = (y, m, d) => y + '-' + pad2(m) + '-' + pad2(d);
+let RECS = {}, viewY = 2026, viewM = 11, busy = false, tutShown = false;
+const CAL = { today: null, items: {}, loaded: {}, local: false };
+const PUZ = {};
+
+/* ---- 紀錄：本機快取（離線也能玩） + 同步到 Google 帳號（跨裝置） ---- */
+const hasServer = () => typeof google !== 'undefined' && google.script && google.script.run;
+function loadRecs() { try { RECS = JSON.parse(localStorage.getItem(REC_KEY) || '{}') || {}; } catch (e) { RECS = {}; } }
+function saveRecs() { try { localStorage.setItem(REC_KEY, JSON.stringify(RECS)); } catch (e) {} }
+
+// 合併兩份同一天的紀錄：完成與達標只進不退，最佳時間取小，進行中的盤面取較新的
+function mergeRec(a, b) {
+  if (!a) return b; if (!b) return a;
+  const r = { done: !!(a.done || b.done), met: !!(a.met || b.met), ts: Math.max(a.ts || 0, b.ts || 0) };
+  const stars = Math.max(a.stars || 0, b.stars || 0); if (stars) r.stars = stars;
+  const dd = a.doneDay || b.doneDay; if (dd) r.doneDay = dd;
+  const bests = [a.best, b.best].filter(v => v > 0);
+  if (bests.length) r.best = Math.min(...bests);
+  const nw = (a.ts || 0) >= (b.ts || 0) ? a : b, od = nw === a ? b : a;
+  r.last = nw.last || od.last; r.board = nw.board || od.board;
+  if (!r.done) { const p = nw.progress || od.progress; if (p) r.progress = p; }
+  return r;
+}
+/* ---- 星星與連續天數（正式判定在伺服器；這裡負責顯示，以及本機預覽時自行計算） ---- */
+const MINT = { 3: 18, 4: 32, 5: 50, 6: 72, 7: 98 }, STAR3 = 0.6, FREEZE_EVERY = 7, FREEZE_MAX = 2, MILESTONES = [3, 7, 14, 30, 60];
+const SK_KEY = 'skyscraperStreak';
+let SK = { cur: 0, best: 0, freezes: 0, last: '', today: false };
+function starsOf(n, tier, best) {
+  if (!best) return 0;
+  const par = PAR[n][tier], eff = Math.max(best, MINT[n]);
+  return eff <= par * STAR3 ? 3 : (eff <= par ? 2 : 1);
+}
+function recStars(key) {
+  const r = RECS[key]; if (!r || !r.done) return 0;
+  if (r.stars) return r.stars;
+  const it = CAL.items[key]; return it && r.best ? starsOf(it.n, it.tier, r.best) : (r.met ? 2 : 1);
+}
+const totalStars = () => Object.keys(RECS).reduce((s, k) => s + recStars(k), 0);
+const starTxt = s => '★'.repeat(s) + '☆'.repeat(3 - s);
+function addDaysKey(key, d) { const p = key.split('-').map(Number), x = new Date(Date.UTC(p[0], p[1] - 1, p[2] + d)); return x.getUTCFullYear() + '-' + pad2(x.getUTCMonth() + 1) + '-' + pad2(x.getUTCDate()); }
+function skView(s, today) {                             // 昨天以前就斷了（沒有補簽卡可救）→ 顯示 0
+  const alive = s.last === today || s.last === addDaysKey(today, -1) || (s.last === addDaysKey(today, -2) && s.freezes > 0);
+  return { cur: alive ? s.cur : 0, best: s.best || 0, freezes: s.freezes || 0, last: s.last || '', today: alive && s.last === today };
+}
+function localStreakLoad() { try { return JSON.parse(localStorage.getItem(SK_KEY)) || { cur: 0, best: 0, freezes: 0, last: '' }; } catch (e) { return { cur: 0, best: 0, freezes: 0, last: '' }; } }
+function localStreakAdvance(today) {                    // 規則和 Code.gs 的 advanceStreak_ 相同
+  const s = localStreakLoad(), ev = { used: false, earned: false };
+  if (s.last === today) return ev;
+  if (s.last === addDaysKey(today, -1)) s.cur += 1;
+  else if (s.last === addDaysKey(today, -2) && s.freezes > 0) { s.freezes -= 1; s.cur += 1; ev.used = true; }
+  else s.cur = 1;
+  s.last = today; s.best = Math.max(s.best || 0, s.cur);
+  if (s.cur % FREEZE_EVERY === 0 && s.freezes < FREEZE_MAX) { s.freezes += 1; ev.earned = true; }
+  try { localStorage.setItem(SK_KEY, JSON.stringify(s)); } catch (e) {}
+  return ev;
+}
+function setStreak(v) { if (v) SK = v; if ($('statBar')) renderStatBar(); }
+function renderStatBar() {
+  const b = $('statBar'); if (!b) return;
+  const on = SK.cur > 0;
+  b.innerHTML = '<span class="fire ' + (on ? 'on' : 'off') + '">' + ic('flame') + (on ? '連續 ' + SK.cur + ' 天' : '今天完成就開始連續') + '</span>'
+    + '<span title="漏一天時自動使用，保住連續天數">' + ic('snow') + '補簽卡 ' + SK.freezes + '</span><span class="star">' + ic('star') + totalStars() + '</span>';
+  if ($('homeView').style.display !== 'none') fitCalendar();
+}
+let WIN_BASE = '';
+// 通關後，伺服器（或本機）回報連續天數：顯示在通關訊息裡，達到里程碑時慶祝
+function onStreakEvent(key, sk, ev) {
+  if (!sk) return;
+  const advanced = sk.cur > SK.cur && key === CAL.today;
+  setStreak(sk);
+  if (!DAILY || DAILY.key !== key || !advanced) return;
+  let tx = '連續 ' + sk.cur + ' 天';
+  if (ev && ev.used) tx += '（已自動使用 1 張補簽卡，連續沒有中斷）';
+  if (ev && ev.earned) tx += '　獲得 1 張補簽卡！';
+  $('winNote').textContent = (WIN_BASE ? WIN_BASE + '\n' : '') + tx;
+  if (MILESTONES.includes(sk.cur)) { toast('連續 ' + sk.cur + ' 天達成！'); Music.sfx('fin'); }
+}
+const SYNC_TXT = {
+  local: ic('device') + '進度存在這個瀏覽器，換裝置不會同步',
+  sync: ic('cloud') + '同步中…',
+  ok: ic('cloudok') + '已同步到你的 Google 帳號，換裝置也能接續',
+  fail: ic('warn') + '同步失敗，進度已先存在本機，稍後會自動重試'
+};
+function setSync(s) { const el = $('syncStat'); if (el) el.innerHTML = SYNC_TXT[s] || ''; }
+
+const dirty = new Set(); let pushT = 0;
+function pushRec(key, now) {
+  dirty.add(key);
+  if (!hasServer()) { setSync('local'); return; }
+  clearTimeout(pushT); pushT = setTimeout(flushRecs, now ? 0 : 2500);   // 玩的過程中稍微延遲合併，過關則立刻送
+}
+function flushRecs() {
+  clearTimeout(pushT);
+  if (!hasServer()) return;
+  const keys = [...dirty]; dirty.clear();
+  keys.forEach(key => {
+    setSync('sync');
+    google.script.run
+      .withSuccessHandler(m => {
+        if (m) { RECS[key] = mergeRec(RECS[key], m); saveRecs(); if (m.sk) onStreakEvent(key, m.sk, m.ev); }
+        if (!dirty.size) setSync('ok');
+        if ($('homeView').style.display !== 'none') refreshHome();
+      })
+      .withFailureHandler(() => { dirty.add(key); setSync('fail'); clearTimeout(pushT); pushT = setTimeout(flushRecs, 15000); })
+      .saveRecord(key, RECS[key]);
+  });
+}
+function touch(key, now) { RECS[key].ts = Date.now(); saveRecs(); pushRec(key, now); }
+
+// 把伺服器的紀錄併進本機；本機比較新或伺服器沒有的，再送上去
+function mergeServerRecs(srv) {
+  new Set([...Object.keys(srv), ...Object.keys(RECS)]).forEach(k => {
+    const m = mergeRec(RECS[k], srv[k]), s = srv[k];
+    if (!m) return;
+    RECS[k] = m;
+    if (!s || (m.ts || 0) > (s.ts || 0) || (m.done && !s.done) || (m.best || 1e9) < (s.best || 1e9)) dirty.add(k);
+  });
+  saveRecs();
+  if (dirty.size) { clearTimeout(pushT); pushT = setTimeout(flushRecs, 300); }
+}
+function pullRecs() {                                   // 切回這個分頁時，抓其他裝置的最新進度
+  if (!hasServer()) return;
+  google.script.run.withSuccessHandler(res => {
+    mergeServerRecs((res && res.recs) || {}); if (res && res.streak) setStreak(res.streak);
+    if ($('homeView').style.display !== 'none') refreshHome();
+  }).getRecords();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) { if (dirty.size) flushRecs(); } else pullRecs(); });
+window.addEventListener('pagehide', () => { if (dirty.size) flushRecs(); });
+
+/* ---- 排程：優先向 Apps Script 伺服器要（全體玩家同一份）；不在 Apps Script 內就用日期推算 ---- */
+function localDateKey() { const d = new Date(); return keyOf(d.getFullYear(), d.getMonth() + 1, d.getDate()); }
+function localSchedule(key) {
+  const r = mulberry32(hashStr('sky-' + key));
+  const total = COMBOS.reduce((s, c) => s + c[2], 0);
+  let x = r() * total, pick = COMBOS[0];
+  for (const c of COMBOS) { x -= c[2]; if (x < 0) { pick = c; break; } }
+  return { n: pick[0], tier: pick[1], seed: Math.floor(r() * 2147483646) + 1 };
+}
+function fetchMonth(y, m, done, fail) {
+  const id = y + '-' + m;
+  if (CAL.loaded[id]) return done();
+  if (!hasServer()) {                               // 本機預覽：用日期推算排程，紀錄只存在這台裝置
+    CAL.local = true; CAL.today = localDateKey();
+    const dim = new Date(y, m, 0).getDate();
+    for (let d = 1; d <= dim; d++) { const k = keyOf(y, m, d); if (k >= START && k <= CAL.today) CAL.items[k] = localSchedule(k); }
+    CAL.loaded[id] = true; setSync('local'); setStreak(skView(localStreakLoad(), CAL.today)); return done();
+  }
+  // 在 Apps Script 內：排程與紀錄都以伺服器為準。連線失敗不改用本機推算，免得每個人拿到不同題目。
+  setSync('sync');
+  google.script.run.withSuccessHandler(res => {
+    CAL.local = false; CAL.today = res.today; Object.assign(CAL.items, res.items); CAL.loaded[id] = true;
+    mergeServerRecs(res.recs || {}); if (res.streak) setStreak(res.streak);
+    if (!dirty.size) setSync('ok');
+    done();
+  }).withFailureHandler(err => { setSync('fail'); if (fail) fail(err); }).getState(y, m);
+}
+
+// 用排程裡的種子產生當天謎題（同一個種子 → 同一題）
+function getDailyPuzzle(key) {
+  if (PUZ[key]) return PUZ[key];
+  const it = CAL.items[key], old = RNG;
+  RNG = mulberry32(it.seed);
+  try { PUZ[key] = generatePuzzle(it.n, it.tier, true); } finally { RNG = old; }
+  return PUZ[key];
+}
+
+/* ---- 狀態 ---- */
+const unlockedPast = () => !!(CAL.today && RECS[CAL.today] && RECS[CAL.today].met);
+function dayState(key) {
+  if (!CAL.today || key > CAL.today || key < START) return 'future';
+  if (RECS[key] && RECS[key].done) return 'done';
+  if (key === CAL.today) return 'today';
+  return unlockedPast() ? 'open' : 'locked';
+}
+function parOf(key) { const it = CAL.items[key]; return it ? PAR[it.n][it.tier] : null; }
+
+/* ---- 月曆畫面 ---- */
+function skylineSvg(key) {
+  const r = mulberry32(hashStr('deco' + key));
+  let s = '<svg viewBox="0 0 40 24" preserveAspectRatio="none" class="deco">';
+  for (let i = 0; i < 6; i++) { const h = 6 + Math.floor(r() * 14); s += '<rect x="' + (i * 6.6 + 0.4) + '" y="' + (24 - h) + '" width="5.6" height="' + h + '"/>'; }
+  return s + '</svg>';
+}
+// 已完成的日子：把最後的盤面畫成小小的等角立體圖
+function drawMini(cvs, b) {
+  const n = b.length, W = 64, dpr = window.devicePixelRatio || 1;
+  cvs.width = W * dpr; cvs.height = W * dpr;
+  const g = cvs.getContext('2d'); if (!g) return;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const yaw = Math.PI / 4, ct = Math.cos(yaw), st = Math.sin(yaw), sp = Math.sin(0.61), cp = Math.cos(0.61);
+  const S = 0.92 * W / (1.63 * n), cx = W / 2, cy = W - 4 - (n / 2) * 1.414 * sp * S;
+  const P = (x, y, z) => ({ sx: cx + (x * ct - y * st) * S, sy: cy - ((x * st + y * ct) * sp + z * cp) * S });
+  const items = [];
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) items.push({ x: c - n / 2 + .5, y: n / 2 - r - .5, h: b[r][c] });
+  items.sort((a, c2) => (c2.x * st + c2.y * ct) - (a.x * st + a.y * ct));
+  const poly = (pts, fill) => {
+    g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p.sx, p.sy) : g.moveTo(p.sx, p.sy)); g.closePath();
+    g.fillStyle = fill; g.fill(); g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = .6; g.stroke();
+  };
+  for (const t of items) {
+    const col = HCOL[t.h] || HCOL[5], x0 = t.x - .36, x1 = t.x + .36, y0 = t.y - .36, y1 = t.y + .36;
+    poly([P(x0,y0,0), P(x0,y1,0), P(x0,y1,t.h), P(x0,y0,t.h)], rgb(col, .62));
+    poly([P(x0,y0,0), P(x1,y0,0), P(x1,y0,t.h), P(x0,y0,t.h)], rgb(col, .8));
+    poly([P(x0,y0,t.h), P(x1,y0,t.h), P(x1,y1,t.h), P(x0,y1,t.h)], rgb(col, 1.08));
+  }
+}
+
+function renderCalendar() {
+  const y = viewY, m = viewM, today = CAL.today;
+  $('calTitle').textContent = y + ' 年 ' + m + ' 月';
+  const [sy, sm] = START.split('-').map(Number), [ty, tm] = today.split('-').map(Number);
+  $('calPrev').disabled = (y * 12 + m) <= (sy * 12 + sm);
+  $('calNext').disabled = (y * 12 + m) >= Math.max(ty * 12 + tm, sy * 12 + sm);
+  const first = new Date(y, m - 1, 1).getDay(), dim = new Date(y, m, 0).getDate();
+  const grid = $('calGrid'); grid.innerHTML = '';
+  '日一二三四五六'.split('').forEach(w => { const d = document.createElement('div'); d.className = 'wd'; d.textContent = w; grid.appendChild(d); });
+  for (let i = 0; i < first; i++) grid.appendChild(document.createElement('div'));
+  calRows = Math.ceil((first + dim) / 7);
+  let solved = 0, avail = 0, stars = 0;
+  for (let d = 1; d <= dim; d++) {
+    const key = keyOf(y, m, d), st = dayState(key), rec = RECS[key];
+    const el = document.createElement('div');
+    el.className = 'day ' + st + ((st === 'today' || st === 'open') ? ' has-tag' : ''); el.dataset.key = key;
+    if (st !== 'future') avail++;
+    if (st === 'done') {
+      solved++; stars += recStars(key);
+      const c = document.createElement('canvas'); c.className = 'mini'; el.appendChild(c);
+      drawMini(c, rec.board);
+      el.insertAdjacentHTML('beforeend', '<span class="dn">' + d + '</span><span class="mk st">' + '★'.repeat(recStars(key)) + '<i>' + '★'.repeat(3 - recStars(key)) + '</i></span><span class="tm">' + fmt(rec.best) + '</span>');
+    } else {
+      el.innerHTML = skylineSvg(key) + '<span class="dn">' + d + '</span>'
+        + (st === 'today' ? '<span class="tag">今日</span>' : st === 'open' ? '<span class="tag">補題</span>' : '')
+        + ((st === 'locked' || st === 'future') ? '<span class="lk">' + ic('lock') + '</span>' : '')
+        + ((rec && rec.progress) ? '<span class="tm">進行中</span>' : '');
+    }
+    el.onclick = () => onDay(key, el);
+    grid.appendChild(el);
+  }
+  $('calStat').textContent = avail ? '本月已完成 ' + solved + ' / ' + avail + ' 天　★ 本月 ' + stars + ' 顆' : '';
+  fitCalendar();
+}
+function renderUnlockBar() {
+  const t = CAL.today, b = $('unlockBar'), rec = RECS[t], par = parOf(t);
+  b.className = 'unlockbar';
+  if (t < START || par === null) { b.innerHTML = ic('calendar') + '每日謎題將於 ' + START.replace(/-/g, '/') + ' 開始'; return; }
+  if (rec && rec.met) { b.classList.add('ok'); b.innerHTML = ic('unlock') + '今日達標！過期謎題已解鎖，可以補題囉'; }
+  else if (rec && rec.done) b.innerHTML = ic('timer') + '今日用時 ' + fmt(rec.last) + '，目標 ' + fmt(par) + '。點「今日」重新挑戰，達標即可解鎖過期謎題';
+  else b.innerHTML = ic('lock') + '過期謎題未解鎖：在 ' + fmt(par) + ' 內解出今日謎題（達標），才能挑戰過期謎題';
+}
+let calRows = 5;
+// 依「螢幕寬度」與「月曆下方還剩多少高度」決定日期格大小，讓整個首頁不用捲動
+function fitCalendar() {
+  const grid = $('calGrid');
+  if (!grid || $('homeView').style.display === 'none') return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const tight = vw < 480 || vh < 620;
+  const gap = tight ? 4 : 6, pad = tight ? 8 : 12, wdH = 18;
+  const top = grid.getBoundingClientRect().top + window.scrollY;
+  let below = 0;
+  for (let e = grid.nextElementSibling; e; e = e.nextElementSibling)
+    if (getComputedStyle(e).display !== 'none') below += e.offsetHeight + 8;
+  const availH = vh - top - below - 2 * pad - wdH - calRows * gap - 24;
+  const maxW = (Math.min(vw - (vw < 480 ? 20 : 40), 560) - 2 * pad - 6 * gap) / 7;
+  let w = Math.min(maxW, (availH / calRows) * 0.8, 96);
+  if (!isFinite(w) || w <= 0) w = maxW;
+  w = Math.floor(Math.max(w, 24));
+  grid.style.gap = gap + 'px'; grid.style.padding = pad + 'px';
+  grid.style.gridTemplateColumns = 'repeat(7, ' + w + 'px)';
+  grid.style.width = (7 * w + 6 * gap + 2 * pad) + 'px';
+  grid.style.setProperty('--dh', Math.round(w / 0.8) + 'px');
+}
+function refreshHome() { renderCalendar(); renderUnlockBar(); renderStatBar(); fitCalendar(); }
+
+let toastT;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800); }
+function shake(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+
+function shiftMonth(dm) {
+  let y = viewY, m = viewM + dm;
+  if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; }
+  $('calGrid').innerHTML = '<div class="calload">載入中…</div>';
+  fetchMonth(y, m, () => { viewY = y; viewM = m; renderCalendar(); },
+             () => { toast('連線失敗，請稍後再試'); renderCalendar(); });
+}
+
+function onDay(key, el) {
+  const st = dayState(key);
+  if (st === 'future') { shake(el); toast('這一天還沒開放喔'); return; }
+  if (st === 'locked') { shake(el); const ub = $('unlockBar'); ub.classList.remove('flash'); void ub.offsetWidth; ub.classList.add('flash'); return; }
+  if (busy) return;
+  busy = true; el.classList.add('loading');
+  setTimeout(() => {                                // 讓「載入中」的抖動先出現，再出題
+    let puz = null;
+    try { puz = getDailyPuzzle(key); } catch (e) {}
+    el.classList.remove('loading');
+    if (!puz) { busy = false; toast('出題失敗，請再試一次'); return; }
+    playReveal(el, key, puz, () => { enterDaily(key, puz); busy = false; });
+  }, 40);
+}
+
+/* ---- 揭開封面的過場動畫：封面飛到畫面中央 → 門像左側為軸打開 → 大樓在裡面長出來 → 展開成全螢幕 ---- */
+function playReveal(el, key, puz, onDone) {
+  const r = el.getBoundingClientRect();
+  const it = CAL.items[key], mo = +key.slice(5, 7), da = +key.slice(8, 10);
+  const wrap = document.createElement('div'); wrap.id = 'reveal';
+  const box = document.createElement('div'); box.className = 'rv-box';
+  const setRect = (l, t, w, h, rad) => {
+    box.style.left = l + 'px'; box.style.top = t + 'px'; box.style.width = w + 'px'; box.style.height = h + 'px'; box.style.borderRadius = rad + 'px';
+  };
+  setRect(r.left, r.top, r.width, r.height, 10);
+  const towers = Array.from({ length: puz.n }, (_, i) =>
+    '<i style="height:' + (28 + ((i * 37 + da * 11) % 56)) + '%;background:' + rgb(HCOL[(i % 7) + 1], 1) + ';animation-delay:' + (1.25 + i * 0.12) + 's"></i>').join('');
+  box.innerHTML =
+    '<div class="rv-inside"><div class="rv-date">' + mo + ' 月 ' + da + ' 日</div>'
+    + '<div class="rv-size">' + puz.n + '×' + puz.n + '</div>'
+    + '<div class="rv-tier">' + TIER_NAME[puz.rating] + '</div>'
+    + '<div class="rv-sky">' + towers + '</div>'
+    + '<div class="rv-par">' + (key === CAL.today ? ic('timer') + '目標時間 ' : ic('star') + '補題・目標時間 ') + fmt(PAR[it.n][it.tier]) + '</div></div>'
+    + '<div class="rv-door">' + skylineSvg(key) + '<span class="dn">' + da + '</span></div>';
+  wrap.appendChild(box); document.body.appendChild(wrap);
+  const door = box.querySelector('.rv-door');
+  let ended = false;
+  const finish = () => {
+    if (ended) return; ended = true;
+    onDone();                                       // 在遮罩底下先切到遊戲畫面
+    wrap.classList.add('out');
+    setTimeout(() => wrap.remove(), 380);
+  };
+  wrap.onclick = finish;                            // 點一下可略過動畫
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    wrap.classList.add('dim');
+    const w = Math.min(innerWidth - 40, 340), h = Math.min(innerHeight - 80, w * 1.3);
+    setRect((innerWidth - w) / 2, (innerHeight - h) / 2, w, h, 18);          // ① 封面飛到中央並放大
+    setTimeout(() => door.classList.add('open'), 650);                        // ② 門打開
+    setTimeout(() => setRect(0, 0, innerWidth, innerHeight, 0), 2300);        // ③ 展開成全螢幕
+    setTimeout(finish, 2850);
+  }));
+}
+
+/* ---- 進出每日謎題 ---- */
+function showGame(daily) {
+  $('homeView').style.display = 'none';
+  $('gameView').style.display = '';
+  $('gameView').classList.toggle('daily', !!daily);
+  Music.scene('game');
+  window.scrollTo(0, 0);
+  if (!tutShown) { tutShown = true; openTutorial(); }     // 第一次進入遊戲先顯示教學（可跳過）
+}
+function goHome() {
+  clearInterval(timerId); close3D(); paintSeg('daily');
+  DAILY = null;
+  $('gameView').style.display = 'none'; $('homeView').style.display = '';
+  Music.scene('cover');
+  refreshHome();
+}
+function noteFor(key) {
+  const rec = RECS[key]; if (!rec || !rec.done) return '';
+  const par = parOf(key), sr = recStars(key), st = '本題 ' + starTxt(sr) + '　';
+  if (key === CAL.today)
+    return st + (rec.met ? '達標！過期謎題已解鎖' : '用時 ' + fmt(rec.last) + '，目標 ' + fmt(par) + '。達標才能解鎖過期謎題，再挑戰一次吧！');
+  return st + (rec.met ? '在目標時間內完成補題！' : '補題完成（目標 ' + fmt(par) + ' 內可得 2 顆星以上）');
+}
+function enterDaily(key, puz) {
+  const it = CAL.items[key], mo = +key.slice(5, 7), da = +key.slice(8, 10);
+  close3D(); paintSeg('daily'); clearInterval(timerId);
+  DAILY = { key, par: PAR[it.n][it.tier] };
+  N = puz.n; TIER = puz.rating; puzzle = puz;
+  buildPad(N);
+  $('gameTitle').innerHTML = ic('calendar') + mo + ' 月 ' + da + ' 日・' + (key === CAL.today ? '今日謎題' : '補題');
+  $('sub').textContent = N + ' × ' + N + ' · ' + TIER_NAME[puz.rating] + ' · 數字 1～' + N + '，每列每行不重複';
+  $('badge').innerHTML = mo + ' 月 ' + da + ' 日・' + (key === CAL.today ? '今日謎題' : '補題') + '<span class="tgt"> ｜ 目標時間 ' + fmt(DAILY.par) + (key === CAL.today ? '（達標可解鎖過期謎題）' : '（達標得 ★）') + '</span>';
+  sel = null; $('msg').textContent = ''; $('msg').className = 'msg';
+  $('btnReplay').style.display = 'none'; $('btnRetry').style.display = 'none';
+  const rec = RECS[key];
+  resetPlay();
+  if (rec && rec.done) {
+    board = rec.board.map(r => r.slice()); finished = true;
+    $('timer').textContent = fmt(rec.best);
+    $('msg').textContent = '已完成！最佳 ' + fmt(rec.best); $('msg').className = 'msg ok';
+    $('winNote').textContent = noteFor(key);
+    $('btnReplay').style.display = ''; $('btnRetry').style.display = '';
+  } else {
+    board = (rec && rec.progress) ? rec.progress.board.map(r => r.slice()) : freshBoard();
+    try {                                                    // 還原「試探中」的狀態（只存在這個瀏覽器；盤面對得上才還原）
+      const sv = JSON.parse(localStorage.getItem('skyscraperTry_' + key));
+      if (sv && JSON.stringify(sv.b) === JSON.stringify(board)) { TENT = new Set(sv.t); TRY = !!sv.on; TRYSNAP = sv.sb || null; }
+    } catch (e) {}
+    finished = false;
+    startTimer(rec && rec.progress ? rec.progress.elapsed : 0);
+    hintN = (rec && rec.progress && rec.progress.hints) || 0; XH = (rec && rec.progress && rec.progress.xh) || 0; paintHint();
+  }
+  showGame(true);
+  render();
+}
+function saveProgress() {                                // 玩到一半離開也會記住盤面與時間
+  if (!DAILY) return;
+  const rec = RECS[DAILY.key] || {};
+  if (rec.done) return;
+  rec.progress = { board: board.map(r => r.slice()), elapsed: Math.floor((Date.now() - startTime) / 1000), hints: hintN, xh: XH };
+  RECS[DAILY.key] = rec; touch(DAILY.key, false);
+  try {
+    const k = 'skyscraperTry_' + DAILY.key;
+    if (TRY || TENT.size) localStorage.setItem(k, JSON.stringify({ b: board, t: [...TENT], on: TRY, sb: TRYSNAP }));
+    else localStorage.removeItem(k);
+  } catch (e) {}
+}
+function onDailyWin() {
+  const key = DAILY.key, secs = Math.max(1, Math.floor((Date.now() - startTime) / 1000));
+  const rec = RECS[key] || {};
+  rec.done = true; rec.last = secs;
+  rec.best = rec.best ? Math.min(rec.best, secs) : secs;
+  rec.met = !!rec.met || secs <= DAILY.par;              // 達標：目標時間內完成（一旦達標就保留）
+  const it = CAL.items[key]; rec.stars = Math.max(rec.stars || 0, XH > 0 ? Math.min(1, starsOf(it.n, it.tier, rec.best)) : starsOf(it.n, it.tier, rec.best));
+  if (XH > 0) rec.cap = 1; else delete rec.cap;
+  rec.board = board.map(r => r.slice());
+  delete rec.progress;
+  let ev = null;
+  if (!hasServer() && key === CAL.today && !rec.doneDay) { rec.doneDay = key; ev = localStreakAdvance(key); }   // 本機預覽：自己算連續天數
+  RECS[key] = rec; touch(key, true);
+  WIN_BASE = noteFor(key) + (XH > 0 ? '\n用了額外提示，這次星星最高 1 顆' : '');
+  if (ev) setTimeout(() => onStreakEvent(key, skView(localStreakLoad(), CAL.today), ev), 0);
+  return WIN_BASE;
+}
+function retryDaily() {
+  if (!DAILY) return;
+  close3D();
+  resetPlay(); board = freshBoard(); finished = false; sel = null;
+  $('msg').textContent = ''; $('msg').className = 'msg';
+  $('btnReplay').style.display = 'none'; $('btnRetry').style.display = 'none';
+  startTimer(0); render();
+}
+function startPractice() {
+  DAILY = null; paintSeg('practice');
+  $('btnRetry').style.display = 'none'; $('winNote').textContent = '';
+  $('gameTitle').innerHTML = ic('grid') + '自由練習';
+  showGame(false);
+  setLevel(PR.n, PR.t);
+}
+
+function paintSeg(m) { document.querySelectorAll('.seg').forEach(g => { g.dataset.on = m; g.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', b.dataset.m === m ? 'true' : 'false')); }); }
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  const inGame = $('gameView').style.display !== 'none';
+  if (b.dataset.m === 'daily') { if (inGame) goHome(); }
+  else if (!inGame || DAILY) startPractice();
+});
+// 計時器可隱藏（Zen）：時間照常計算，只是不顯示
+let ZEN = false; try { ZEN = localStorage.getItem('skyscraperZen') === '1'; } catch (e) {}
+function paintZen() { $('gameView').classList.toggle('zen', ZEN); $('timerBtn').setAttribute('aria-pressed', ZEN ? 'true' : 'false'); }
+$('timerBtn').onclick = () => {
+  ZEN = !ZEN; paintZen();
+  let seen = false; try { localStorage.setItem('skyscraperZen', ZEN ? '1' : '0'); seen = localStorage.getItem('skyscraperZenSeen') === '1'; if (ZEN) localStorage.setItem('skyscraperZenSeen', '1'); } catch (e) {}
+  if (ZEN && !seen) toast('時間已隱藏，仍在背景計算，過關時會顯示');
+};
+paintZen();
+$('btnRetry').onclick = retryDaily; $('w3Retry').onclick = retryDaily;
+$('btnHelp2').onclick = openTutorial;
+$('calPrev').onclick = () => shiftMonth(-1);
+$('calNext').onclick = () => shiftMonth(1);
+
+/* ========== 啟動 ========== */
+/* ================= 背景音樂（Web Audio 即時合成，不需任何音檔） ================= */
+const Music = (() => {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const LS = 'skyscraperMusic';
+  let scoreNodes = [], ctx = null, master = null, bus = null, sfxG = null, on = true, scene = 'cover', timer = null, nextT = 0, step = 0, duck = 1;
+  try { if (localStorage.getItem(LS) === 'off') on = false; } catch (e) {}
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+  // 封面：明亮溫暖的琶音；遊戲：更慢、更稀疏、不搶注意力
+  const TRACKS = {
+    cover: { step: 60 / 84 / 2, len: 8,
+      chords: [[48,55,59,64],[45,52,60,64],[41,48,57,64],[43,50,59,62]] },
+    game:  { step: 60 / 60 / 2, len: 16,
+      chords: [[45,52,60,64],[41,48,57,60],[48,55,60,64],[43,50,59,62]] }
+  };
+  function tone(f, t, dur, type, vol, atk, dest) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + atk);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest || bus);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function playStep(t) {
+    const tr = TRACKS[scene], ch = tr.chords[Math.floor(step / tr.len) % tr.chords.length], i = step % tr.len;
+    if (scene === 'cover') {
+      if (i === 0) ch.forEach(m => tone(mtof(m), t, tr.step * 8.5, 'sine', 0.05, 0.5));
+      tone(mtof(ch[[0,1,2,3,2,1,2,3][i]] + 12), t, 0.9, 'triangle', 0.075, 0.01);
+      if (i === 4 || i === 7) tone(mtof(ch[3] + 24), t, 1.2, 'sine', 0.04, 0.01);
+    } else {
+      if (i === 0) ch.forEach(m => tone(mtof(m), t, tr.step * 16.5, 'sine', 0.05, 1.2));
+      if (Math.random() < 0.38) {
+        const m = ch[Math.floor(Math.random() * 4)] + 12 * (1 + Math.floor(Math.random() * 2));
+        tone(mtof(m), t, 1.8, 'sine', 0.055, 0.02);
+      }
+    }
+    step++;
+  }
+  function tick() {
+    if (!ctx || !on || ctx.state !== 'running') return;
+    const lim = ctx.currentTime + 0.35;
+    if (nextT < ctx.currentTime) nextT = ctx.currentTime + 0.05;
+    while (nextT < lim) { playStep(nextT); nextT += TRACKS[scene].step; }
+  }
+  function level() {
+    if (master) master.gain.setTargetAtTime(on ? 0.55 * duck : 0, ctx.currentTime, 0.25);
+    if (sfxG) sfxG.gain.setTargetAtTime(on ? 0.8 : 0, ctx.currentTime, 0.05);
+  }
+  function ensure() {
+    if (!AC) return;
+    if (!ctx) {
+      try {
+        ctx = new AC();
+        master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+        sfxG = ctx.createGain(); sfxG.gain.value = 0; sfxG.connect(ctx.destination);
+        bus = ctx.createGain();
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
+        const dl = ctx.createDelay(1); dl.delayTime.value = 0.42;
+        const fb = ctx.createGain(); fb.gain.value = 0.36;
+        const wet = ctx.createGain(); wet.gain.value = 0.5;
+        bus.connect(lp); lp.connect(master);
+        lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(master);
+        timer = setInterval(tick, 120);
+      } catch (e) { ctx = null; return; }
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    level();
+  }
+  function paint() {
+    ['btnMusic', 'btnMusic2'].forEach((id, k) => {
+      const b = $(id); if (!b) return;
+      b.innerHTML = ic(on ? 'note' : 'noteoff');
+      b.classList.toggle('off', !on);
+      b.title = on ? '關閉背景音樂' : '開啟背景音樂';
+    });
+  }
+  const SCALE = [72, 74, 76, 77, 79, 81, 83];     // C D E F G A B（C5～B5）
+  function sfx(name, a, b) {
+    if (!ctx || !on || ctx.state !== 'running') return;
+    const t = ctx.currentTime + 0.01, d = sfxG, T = (f, s, dur, type, vol) => tone(f, t + s, dur, type, vol, 0.005, d);
+    if (name === 'tap') T(880, 0, 0.07, 'sine', 0.12);
+    else if (name === 'set') { T(587, 0, 0.1, 'triangle', 0.2); T(880, 0.03, 0.08, 'sine', 0.08); }
+    else if (name === 'clear') T(330, 0, 0.1, 'triangle', 0.16);
+    else if (name === 'bad') { T(233, 0, 0.2, 'triangle', 0.26); T(175, 0.16, 0.34, 'triangle', 0.26); }
+    else if (name === 'ok') { T(784, 0, 0.35, 'sine', 0.22); T(1047, 0.12, 0.6, 'sine', 0.22); T(1319, 0.24, 0.8, 'triangle', 0.12); }
+    else if (name === 'chime') {            // a = 樓高：1→Do 2→Re 3→Mi 4→Fa 5→Sol 6→La 7→Si
+      const m = SCALE[(a - 1) % 7];
+      T(mtof(m), 0, 1.1, 'sine', 0.2); T(mtof(m + 12), 0, 0.5, 'sine', 0.05);
+    }
+    else if (name === 'hold') {             // 同樣高度的大樓共用一個長音，從第一棟開始長一直響到最後一棟長好
+      const m = SCALE[(a - 1) % 7], d = Math.max(0.7, b || 1);
+      tone(mtof(m), t, d + 0.5, 'triangle', 0.14, 0.12, sfxG); tone(mtof(m + 12), t, d + 0.3, 'sine', 0.04, 0.12, sfxG);
+    }
+    else if (name === 'fin') [72, 76, 79, 84, 88].forEach((m, i) => { T(mtof(m), i * 0.09, 1.6, 'triangle', 0.14); T(mtof(m - 12), i * 0.09, 1.6, 'sine', 0.08); });
+  }
+  const api = {
+    sfx,
+    scene(s) { if (s === scene) return; scene = s; step = 0; if (ctx) nextT = ctx.currentTime + 0.3; },
+    toggle() {
+      on = !on;
+      try { localStorage.setItem(LS, on ? 'on' : 'off'); } catch (e) {}
+      paint();
+      if (on) { ensure(); } else level();
+    },
+    score(groups, total) {                    // 每個高度一個長音：Do=1層…Si=7層，起訖對齊大樓生長
+      this.scoreStop();
+      if (!ctx || !on || ctx.state !== 'running') return;
+      const t0 = ctx.currentTime + 0.02;
+      groups.forEach(g => {
+        const m = SCALE[(g.h - 1) % 7], s = t0 + g.s / 1000, e = t0 + g.e / 1000;
+        [[mtof(m), 'triangle', 0.14], [mtof(m + 12), 'sine', 0.04]].forEach(([f, type, v]) => {
+          const o = ctx.createOscillator(), gn = ctx.createGain();
+          o.type = type; o.frequency.value = f;
+          gn.gain.setValueAtTime(0.0001, s);
+          gn.gain.linearRampToValueAtTime(v, s + 0.03);
+          gn.gain.setValueAtTime(v, e - 0.08);
+          gn.gain.linearRampToValueAtTime(0.0001, e);
+          o.connect(gn); gn.connect(sfxG); o.start(s); o.stop(e + 0.02);
+          scoreNodes.push(o);
+        });
+      });
+      [72, 76, 79, 84, 88].forEach((m, i) => {
+        const s = t0 + total / 1000 + i * 0.09;
+        [[mtof(m), 'triangle', 0.14], [mtof(m - 12), 'sine', 0.08]].forEach(([f, type, v]) => {
+          const o = ctx.createOscillator(), gn = ctx.createGain();
+          o.type = type; o.frequency.value = f;
+          gn.gain.setValueAtTime(0.0001, s); gn.gain.linearRampToValueAtTime(v, s + 0.005);
+          gn.gain.exponentialRampToValueAtTime(0.0001, s + 1.6);
+          o.connect(gn); gn.connect(sfxG); o.start(s); o.stop(s + 1.65);
+          scoreNodes.push(o);
+        });
+      });
+    },
+    scoreStop() { scoreNodes.forEach(o => { try { o.stop(); } catch (e) {} }); scoreNodes = []; },
+    duck(v) { duck = v ? 0.45 : 1; level(); },
+    init() {
+      paint();
+      $('btnMusic').onclick = $('btnMusic2').onclick = api.toggle;
+      // 瀏覽器規定要先有使用者操作才能發聲：第一次點擊／按鍵時開始
+      const first = () => { if (on) ensure(); else if (!ctx) ensure(); };
+      ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, first, { passive: true }));
+      document.addEventListener('visibilitychange', () => {
+        if (!ctx) return;
+        if (document.hidden) ctx.suspend(); else if (on) ctx.resume();
+      });
+    }
+  };
+  return api;
+})();
+
+function init() {
+  loadRecs();
+  if (!Music.ready) { Music.ready = true; Music.init(); }
+  try {
+    const sn = +localStorage.getItem('skyscraperLevel'); if ([3,4,5,6,7].includes(sn)) PR.n = sn;
+    const st = localStorage.getItem('skyscraperTier'); if (['0','1','2'].includes(st)) PR.t = +st;
+  } catch (e) {}
+  const now = new Date();
+  viewY = now.getFullYear(); viewM = now.getMonth() + 1;
+  $('calGrid').innerHTML = '<div class="calload">載入月曆中…</div>';
+  const fail = () => {
+    $('calGrid').innerHTML = '<div class="calload">連線失敗，請檢查網路後<button id="calRetry" style="margin-left:8px">重試</button></div>';
+    $('calRetry').onclick = init;
+  };
+  fetchMonth(viewY, viewM, () => {
+    const [ty, tm] = CAL.today.split('-').map(Number), [sy, sm] = START.split('-').map(Number);
+    let vy = ty, vm = tm;
+    if (vy * 12 + vm < sy * 12 + sm) { vy = sy; vm = sm; }           // 還沒開始：先顯示起始月份
+    const go = () => {
+      viewY = vy; viewM = vm; refreshHome();
+      setTimeout(() => {                                              // 閒置時先把今天的謎題準備好，點開更快
+        const t = CAL.today;
+        try { if (CAL.items[t] && dayState(t) !== 'done') getDailyPuzzle(t); } catch (e) {}
+      }, 600);
+    };
+    if (vy !== viewY || vm !== viewM) fetchMonth(vy, vm, go, fail); else go();
+  }, fail);
+}
+init();
+</script>
+

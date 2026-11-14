@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>錨界入口</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap">
+<style>
+/* 佈局概念：上方岑禾的今日一句，下方三張領域卡（海、天、地），最後是本週三燈紀錄。 */
+:root{
+  --font-display:"Noto Serif TC","Songti TC",serif;
+  --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --bg:#e9ecf0; --surface:#f7f6f2; --ink:#1b2433; --muted:#5d6878; --line:#cdd3dc;
+  --accent:#2c4a7c; --accent-soft:#dbe4f3; --reward:#b9871f; --reward-soft:#f3e3b5;
+  --sea:#1d6a86; --sky:#5559c2; --land:#8f6f22; --bad:#b0382f;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10141d; --surface:#192031; --ink:#e5e9f1; --muted:#97a2b5; --line:#2c364b;
+  --accent:#8fb0e8; --accent-soft:#25324d; --reward:#e3b647; --reward-soft:#4b3d16;
+  --sea:#6ec3e0; --sky:#a3a6f5; --land:#e0b95a; --bad:#ec7b70; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10141d; --surface:#192031; --ink:#e5e9f1; --muted:#97a2b5; --line:#2c364b;
+  --accent:#8fb0e8; --accent-soft:#25324d; --reward:#e3b647; --reward-soft:#4b3d16;
+  --sea:#6ec3e0; --sky:#a3a6f5; --land:#e0b95a; --bad:#ec7b70; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.55;
+  padding-block:8px 12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,a{font:inherit}
+button{color:inherit;cursor:pointer}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--font-display);font-weight:900;font-size:clamp(26px,7vw,38px);line-height:1.1;margin:0;letter-spacing:.06em}
+.sub{color:var(--muted);font-size:12px;letter-spacing:.1em;margin-top:2px}
+.ibtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:13px;min-height:36px}
+.today{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.today .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.today .d{font-size:12px;color:var(--muted);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.today .q{font-family:var(--font-display);font-weight:600;font-size:clamp(17px,4.4vw,22px);line-height:1.45;text-wrap:balance}
+.today .who{font-size:12px;color:var(--muted);letter-spacing:.1em;text-align:right}
+.week-chip{font-size:11px;border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:0 9px}
+h2{font-size:12px;letter-spacing:.14em;color:var(--muted);margin:0 0 4px;font-weight:700}
+.cards{display:flex;flex-direction:column;gap:8px}
+.card{--icobg:color-mix(in srgb,var(--c) 15%,var(--surface));background:linear-gradient(180deg,color-mix(in srgb,var(--c) 11%,var(--surface)),var(--surface) 70%);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:12px;padding:8px 12px 8px 10px;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center;min-width:0}
+.card .ico{width:52px;height:52px;color:var(--c);background:var(--icobg);border-radius:12px;padding:5px}
+.card .ico svg{width:100%;height:100%;display:block}
+.card .dom{font-size:11px;letter-spacing:.14em;color:var(--c);font-weight:700;line-height:1.2}
+.card h3{margin:0;font-family:var(--font-display);font-size:19px;font-weight:900;letter-spacing:.04em;line-height:1.25}
+.card .info{font-size:12px;color:var(--muted);line-height:1.35}
+.card .row{display:flex;flex-direction:column;gap:2px;align-items:stretch}
+.go{display:inline-flex;align-items:center;justify-content:center;background:var(--c);color:#fff;border-radius:8px;padding:6px 16px;font-weight:700;text-decoration:none;min-height:36px;border:0}
+:root[data-theme="dark"] .go{color:#10141d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .go{color:#10141d}}
+.go[aria-disabled="true"]{background:var(--line);color:var(--muted);cursor:default;pointer-events:none}
+.chk{display:flex;gap:5px;align-items:center;font-size:12px;min-height:28px;cursor:pointer;justify-content:center;color:var(--muted)}
+.chk input{width:16px;height:16px;accent-color:var(--c)}
+.lamps{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.lamps .sum{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:baseline;margin-bottom:6px;font-size:13px}
+.lamps .sum b{font-size:18px;font-family:var(--font-display);color:var(--reward)}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.day{border:1px solid var(--line);border-radius:8px;padding:3px 2px;text-align:center;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.day.now{border-color:var(--accent);color:var(--ink)}
+.day .dots{display:flex;gap:3px;justify-content:center;margin-top:4px}
+.dot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line)}
+.dot.on.sea{background:var(--sea);border-color:var(--sea)}
+.dot.on.sky{background:var(--sky);border-color:var(--sky)}
+.dot.on.land{background:var(--land);border-color:var(--land)}
+.day.full{background:var(--reward-soft);border-color:var(--reward)}
+.toast{background:var(--reward-soft);border:1px solid var(--reward);border-radius:8px;padding:8px 12px;font-size:14px;margin-bottom:10px}
+.how{margin-top:6px;font-size:12px}
+.how summary{cursor:pointer;color:var(--accent)}
+.how pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;font-size:12px;line-height:1.5;white-space:pre}
+.how code{font-size:12px}
+.note{font-size:12px;color:var(--muted)}
+dialog{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;max-width:min(520px,calc(100vw - 32px));width:100%;padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h3{margin:0 0 10px;font-family:var(--font-display)}
+input.url{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+label.l{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.act{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.err{color:var(--bad);font-size:13px;min-height:1.4em}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>錨界</h1>
+      <div class="sub">每日入口 · 校準員，今天也請到站</div>
+    </div>
+  </header>
+
+  <section class="today" aria-label="岑禾今日一句">
+    <div class="top"><span class="d" id="dateLine"></span><span class="week-chip" id="weekChip"></span></div>
+    <div class="q" id="quote"></div>
+    <div class="who">— 岑禾</div>
+  </section>
+
+  <section aria-labelledby="hCards">
+    <h2 id="hCards">今日三處校準</h2>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="lamps" aria-labelledby="hLamps">
+    <h2 id="hLamps">三燈紀錄</h2>
+    <div class="sum"><span>今日亮燈 <b id="tonight">0</b> / 3</span><span>三燈齊亮的連續天數 <b id="run">0</b></span></div>
+    <div class="days" id="days"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <details class="how"><summary>怎麼點亮？</summary><p class="note">遊戲完成當天的題目後，按完成畫面上的「回入口」，這裡就會自動點亮。紀錄只存在這個瀏覽器，也可以手動勾選或取消。</p></details>
+  </section>
+</div>
+
+
+
+<script>
+(function(){
+var START="2026-11-01";
+var LINES=[["今天的缺口在這裡。先看邊上的數字。","第一次不用快。第一次只要對。","邊上的數字很安靜，但它們從不重複自己。","看不懂的時候，先看最小的那一格。","從最確定的地方開始。其他的會自己靠過來。","今天的霧不厚，但也不薄。","第一週。你還在，這就夠了。"],["再看一眼。世界不會跑，但記憶會。","回聲不會說謊，只會說得很短。","從邊緣看進去，比走進去看得清楚。","視線被擋住的地方，才是線索。","數字是別人替你量好的。別浪費。","每一條線都在告訴你它看見了什麼。","邊界不是牆。是門縫。"],["……好吧。這盞燈算你欠我的。","我的燈不免費。","第二次，也算你欠我的。","問一次是學，問三次是習慣。","燈借出去，光就少一點。我自己的。","不是不借。是借了，你就不會看了。","這週我記了一本帳。你別問裡面寫什麼。"],["別數日子，只管下一盞。","燈一盞接一盞，才叫脈。","斷了不怪你。怪的是不再點的那個人。","備燈是給累的人，不是給懶的人。","我替你守過一晚。別讓我白守。","城裡第一盞燈，是誰點的？沒有人記得。","一個月之後，你會記得今天嗎？我會。"],["試航？好。記得，走不通的分支，會散。","霧很深的時候，船都靠直覺。","有人比我更擅長試航。我只是不願意承認。","試航不是亂猜。是帶著問題往前走。","回頭的人，不一定是輸了。","那艘補丁船，我見過。很久以前。","深的霧，不代表沒有路。"],["它不是原來那一天，但它是真的。","有一天沒人點燈。就那麼一天。","缺日不是你的錯。是霧的。","過去的日子，補上去就是新的了。","補，總比空著好。","我試過不補。結果更糟。","你補的每一天，都是有人欠著的一天。"],["尺上的刻度不全是我刻的。","公文我先放著。","有人在院裡等我回信。我還沒想好怎麼回。","刻度可以量世界，也可以量人。我不喜歡後一種。","院裡的人說話，總是很準。準到不像話。","我離開那裡，不是因為它錯了。","今天先不談院裡。"],["餘像不會痛。我只是記得它們原本的樣子。","它還在。你看見了嗎？","有些東西，不是散了，只是還沒走。","不要靠太近。……算了，靠近一點也行。","我曾經很擅長讓它們走。","別問我它是誰。我還不知道。","今天的題不難。難的是別的。"],["我也在等一個回聲。","一個人點不亮一座城。","你們班的數字在漲。我看見了。","回聲要有很多人一起，才聽得出方向。","我習慣一個人。但這一週，還行。","全服的光，加起來，比我一個人的亮。","別讓它停在這裡。"],["院裡派人來了。","月曆底下還有一頁。我知道它在哪。","那一頁是乾淨的。太乾淨了。","不是霧。霧不會這麼整齊。","有人把它擦過。","我的筆記本上，也有一格是這樣。","下一季見。……別遲到。"]];
+var WEEKS=["薄霧","邊界","借燈","燈脈","深霧","缺日","刻度","餘像","回聲","第 0 日的邊緣"];
+var LAND=[["薄霧",1],["薄霧",1],["薄霧",1],["中霧",1],["中霧",1],["中霧",1],["濃霧",1],["薄霧",2],["中霧",2],["中霧",2],["濃霧",2],["濃霧",2],["濃霧",2],["深霧",2],["薄霧",3],["中霧",3],["中霧",3],["濃霧",3],["濃霧",3],["濃霧",3],["深霧",3],["薄霧",4],["中霧",4],["中霧",4],["濃霧",4],["濃霧",4],["濃霧",4],["深霧",4],["薄霧",5],["中霧",5],["中霧",5],["濃霧",5],["濃霧",5],["濃霧",5],["深霧",5],["薄霧",6],["中霧",6],["中霧",6],["濃霧",6],["濃霧",6],["濃霧",6],["深霧",6],["薄霧",7],["中霧",7],["中霧",7],["濃霧",7],["濃霧",7],["濃霧",7],["深霧",7],["薄霧",8],["中霧",8],["中霧",8],["濃霧",8],["濃霧",8],["濃霧",8],["深霧",8],["薄霧",9],["中霧",9],["中霧",9],["濃霧",9],["濃霧",9],["濃霧",9],["深霧",9],["薄霧",10],["中霧",10],["中霧",10],["濃霧",10],["濃霧",10],["濃霧",10],["深霧",10]];   // 九宮域每日 [霧級, 週次]
+var LAND_THEME=["","確證","排除","和","三格和","差","混合","星群","星群與和差","靜默站","賽季終題"];
+var LAND_URL="./jiugong.html";
+function $(id){return document.getElementById(id)}
+function p2(n){return n<10?"0"+n:""+n}
+function ymd(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}
+function dd(a,b){return Math.round((new Date(b+"T00:00:00Z")-new Date(a+"T00:00:00Z"))/864e5)}
+function add(s,n){var d=new Date(s+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+var S={links:{},done:{}};
+try{var r=localStorage.getItem("anchor:hub:v1");if(r){var o=JSON.parse(r);S.links=o.links||{};S.done=o.done||{}}}catch(e){}
+function save(){try{localStorage.setItem("anchor:hub:v1",JSON.stringify(S))}catch(e){}}
+var today=ymd(new Date()),rawIdx=dd(START,today),idx=Math.max(0,Math.min(69,rawIdx));
+var week=Math.floor(idx/7);
+
+function okUrl(u){return /^https:\/\/\S+$/.test(u)}
+var ICON={
+ boat:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 7v23M24 9l12 17H24zM22 14 12 26h10z"/><path d="M9 31h30l-5 7H14z"/><path d="M5 43q4.5-3 9 0t9 0 9 0 9 0 5-1"/></svg>',
+ tower:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 43V9h16v34M28 43V21h9v22M5 43h38"/><path d="M17 15h6M17 22h6M17 29h6M17 36h6M32 27h1M32 34h1" /></svg>',
+ land:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="34" height="34" rx="4"/><path d="M18.3 7v34M29.7 7v34M7 18.3h34M7 29.7h34"/><rect x="18.3" y="18.3" width="11.4" height="11.4" style="fill:var(--icobg);stroke:none"/><path d="M24 19l2 4.3 4.7.6-3.5 3.2.9 4.6L24 29.3l-4.1 2.4.9-4.6-3.5-3.2 4.7-.6z" fill="currentColor" stroke-width="1"/></svg>'};
+var GAMES=[
+ {k:"boat",dom:"海測",name:"發現小船",c:"var(--sea)",info:function(){return "讀回波，推出船的位置。"}},
+ {k:"tower",dom:"天測",name:"發現大樓",c:"var(--sky)",info:function(){return "讀視線，推出樓的高度。"}},
+ {k:"land",dom:"地測",name:"九宮域",c:"var(--land)",info:function(){var L=LAND[idx];return "今日"+L[0]+"，讀觀測站定位。"}}
+];
+var DEFAULTS={boat:"./boat.html",tower:"./sky.html",land:LAND_URL};
+function url(g){return DEFAULTS[g.k]||""}
+
+function renderToday(){
+  $("dateLine").textContent=today+(rawIdx<0?"　（賽季尚未開始，顯示第 1 日）":rawIdx>69?"　（賽季已結束，顯示最後一日）":"　第 "+(idx+1)+" 日");
+  $("weekChip").textContent="第 "+(week+1)+" 週・"+WEEKS[week];
+  $("quote").textContent=LINES[week][idx%7];
+}
+function renderCards(){
+  var box=$("cards");box.innerHTML="";
+  GAMES.forEach(function(g){
+    var c=document.createElement("div");c.className="card";c.style.setProperty("--c",g.c);
+    var u=url(g);
+    c.innerHTML='<div class="ico" aria-hidden="true">'+ICON[g.k]+'</div><div class="txt"><div class="dom">'+g.dom+'</div><h3>'+g.name+'</h3><div class="info"></div></div><div class="row"></div>';
+    c.querySelector(".info").textContent=g.info();
+    var row=c.querySelector(".row");
+    var a=document.createElement("a");a.className="go";a.textContent=u?"開始":"尚未設定連結";
+    if(u){a.href=u}else{a.setAttribute("aria-disabled","true")}
+    row.appendChild(a);
+    var lb=document.createElement("label");lb.className="chk";
+    var cb=document.createElement("input");cb.type="checkbox";cb.id="chk-"+g.k;
+    cb.checked=!!(S.done[today]&&S.done[today][g.k]);
+    cb.addEventListener("change",function(){S.done[today]=S.done[today]||{};S.done[today][g.k]=cb.checked;save();renderLamps()});
+    lb.appendChild(cb);lb.appendChild(document.createTextNode("完成了"));
+    row.appendChild(lb);
+    box.appendChild(c);
+  });
+}
+function count(d){var x=S.done[d]||{};return (x.boat?1:0)+(x.tower?1:0)+(x.land?1:0)}
+function renderLamps(){
+  $("tonight").textContent=count(today);
+  var run=0,d=count(today)===3?today:add(today,-1);
+  while(count(d)===3){run++;d=add(d,-1)}
+  $("run").textContent=run;
+  var days=$("days");days.innerHTML="";
+  var mon=new Date(today+"T00:00:00Z").getUTCDay();mon=(mon+6)%7; // 週一=0
+  var first=add(today,-mon);
+  for(var i=0;i<7;i++){
+    var d=add(first,i),x=S.done[d]||{},el=document.createElement("div");
+    el.className="day"+(d===today?" now":"")+(count(d)===3?" full":"");
+    el.innerHTML='<div>'+["一","二","三","四","五","六","日"][i]+' '+d.slice(8)+'</div><div class="dots"><span class="dot sea'+(x.boat?" on":"")+'"></span><span class="dot sky'+(x.tower?" on":"")+'"></span><span class="dot land'+(x.land?" on":"")+'"></span></div>';
+    days.appendChild(el);
+  }
+}
+var HUB="./index.html";
+var NAMES={boat:"海測",tower:"天測",land:"地測"};
+function applyHash(){
+  var m=/^#done-(boat|tower|land)$/.exec(location.hash||"");
+  if(!m)return;
+  S.done[today]=S.done[today]||{};S.done[today][m[1]]=true;save();
+  renderCards();renderLamps();
+  var t=$("toast");t.hidden=false;t.textContent="已點亮："+NAMES[m[1]]+"。今日亮燈 "+count(today)+" / 3。";
+  try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+}
+window.addEventListener("hashchange",applyHash);
+renderToday();renderCards();renderLamps();applyHash();
+})();
+</script>
