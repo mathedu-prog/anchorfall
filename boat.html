@@ -224,11 +224,12 @@
   @keyframes u-ring { 0%, 92% { opacity: 0; transform: scale(1); } 93% { opacity: .95; } 100% { opacity: 0; transform: scale(2.6); } }
   @media (prefers-reduced-motion: reduce) { #ceScene * { animation: none !important; } #ceScene .u-gl, #ceScene .u-bw { display: none; } }
 
-  #tutcard { background: #fff; border-radius: 12px; max-width: 540px; width: 100%; max-height: calc(100vh - 24px); overflow: auto;
+  #tutcard { background: #fff; border-radius: 12px; max-width: 540px; width: 100%; max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow: hidden;
              padding: 18px 18px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.35); }
   #tutcard h2 { margin: 0 0 8px; font-size: 19px; }
   #tutcard { display: flex; flex-direction: column; }
-  #tutbody { flex: 1 1 auto; font-size: 15px; line-height: 1.55; }
+  #tutbody { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; font-size: 15px; line-height: 1.55; }
+  #tutcard h2, #tutnav, #tutnever { flex: none; }
   #tutbody p { margin: 6px 0; }
   .minirow { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
   .minibox { text-align: center; margin: 6px 10px; }
