@@ -1418,8 +1418,10 @@ function labClass(cur, target) {
 }
 
 /* 點一下：空白 → 水 → 船 → 空白。按住拖曳：從起點沿直線連續塗上同一種狀態。
- * 起點的下一個狀態就是「筆」：塗水、塗船，或（起點是船時）擦成空白。
- * 塗水／塗船只改空白格；船最多塗到「本題最大船格數」，超過的格子維持空白。 */
+ * 起點的下一個狀態就是「筆」：
+ *   塗水（起點是空白）：跟著手指走過的格子塗，可以轉彎繞圈，也會蓋掉船；題目預填的格子不動。
+ *   塗船（起點是水）：沿直線，最多塗到「本題最大船格數」，超過的格子維持空白，且只改空白格。
+ *   擦除（起點是船）：沿直線擦成空白。 */
 function cellAt(x, y) {
   const el = document.elementFromPoint(x, y), g = $('grid');
   if (!el || !g.contains(el)) return null;
@@ -1434,6 +1436,10 @@ function cellAt(x, y) {
   function apply(r, c) {                     // 依起點與目前格，重算整條線
     const n = puzzle.size, base = G.base, pen = G.pen;
     for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) state[i][j] = base[i][j];
+    if (pen === 1) {                         // 塗水：走過的每一格
+      G.vis.forEach(p => { if (!locked[p[0]][p[1]]) state[p[0]][p[1]] = 1; });
+      return;
+    }
     const vert = Math.abs(r - G.r0) >= Math.abs(c - G.c0), cells = [];
     if (vert) { const st = r >= G.r0 ? 1 : -1; for (let i = G.r0; i !== r + st; i += st) cells.push([i, G.c0]); }
     else { const st = c >= G.c0 ? 1 : -1; for (let j = G.c0; j !== c + st; j += st) cells.push([G.r0, j]); }
@@ -1449,12 +1455,25 @@ function cellAt(x, y) {
     const p = cellAt(e.clientX, e.clientY); if (!p || p[1] >= puzzle.size) return;
     if (locked[p[0]][p[1]]) return;
     const n = puzzle.size;
-    G = { r0: p[0], c0: p[1], last: p[0] + ',' + p[1], base: state.map(r => r.slice()), pen: (state[p[0]][p[1]] + 1) % 3, moved: false, id: e.pointerId };
+    G = { r0: p[0], c0: p[1], last: p[0] + ',' + p[1], base: state.map(r => r.slice()), pen: (state[p[0]][p[1]] + 1) % 3, moved: false, id: e.pointerId, vis: [[p[0], p[1]]], seen: new Set([p[0] + ',' + p[1]]), px: e.clientX, py: e.clientY };
     try { g.setPointerCapture(e.pointerId); } catch (x) { /* 不支援就算了 */ }
     wrong = new Set(); dragging = true; apply(p[0], p[1]); render();
   });
   g.addEventListener('pointermove', e => {
     if (!G || e.pointerId !== G.id) return;
+    if (G.pen === 1) {                       // 塗水：沿著手指軌跡逐點取樣，快速滑動也不漏格
+      const dx = e.clientX - G.px, dy = e.clientY - G.py, steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 6));
+      let add = false;
+      for (let k = 1; k <= steps; k++) {
+        const p = cellAt(G.px + dx * k / steps, G.py + dy * k / steps);
+        if (!p || p[1] >= puzzle.size) continue;
+        const key = p[0] + ',' + p[1];
+        if (!G.seen.has(key)) { G.seen.add(key); G.vis.push(p); add = true; }
+      }
+      G.px = e.clientX; G.py = e.clientY;
+      if (add) { G.moved = true; apply(0, 0); render(); }
+      return;
+    }
     const p = cellAt(e.clientX, e.clientY); if (!p || p[1] >= puzzle.size) return;
     const key = p[0] + ',' + p[1]; if (key === G.last) return;
     G.last = key; G.moved = true; apply(p[0], p[1]); render();
