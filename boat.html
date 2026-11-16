@@ -75,7 +75,7 @@
   #size { flex: 0 0 74px; }
   #hints, #seed { width: 0; flex: 1 1 70px; min-width: 0; }
   #infoline { display: flex; flex-wrap: wrap; gap: 2px 10px; justify-content: center; align-items: center; }
-  #grid { display: grid; margin: 4px 0; }
+  #grid { display: grid; margin: 4px 0; touch-action: none; user-select: none; -webkit-user-select: none; }
   .cell { width: var(--cs); height: var(--cs); border: 1px solid #888; background: #fff; position: relative;
           cursor: pointer; user-select: none; -webkit-user-select: none;
           display: flex; align-items: center; justify-content: center; }
@@ -1226,6 +1226,7 @@ let mode = 'cal';              // 'cal' 月曆　'daily' 每日謎題　'practic
 let lastSolved = false;
 let wrong = new Set();         // 「檢查答案」找出的錯格
 let cheated = false;           // 練習模式：是否按過「看答案」
+let dragging = false;           // 手指正在拖曳塗格
 let frozen = false;            // 每日謎題：完成後鎖定棋盤
 let solvedHandled = false;     // 每日謎題：完成事件只處理一次
 let dailyDate = null, dailyData = null;
@@ -1351,6 +1352,7 @@ function fleetIcons(fl, fleet, lens, cs) {
 function render() {
   const n = puzzle.size;
   const info = analyze();
+  if (dragging) info.solved = false;          // 拖曳中不判定過關，放開手指後才判定
   if (mode === 'exam' && !exRules) info.bad = new Set();
   const grid = $('grid');
   const cs = boardSize(n);
@@ -1367,7 +1369,6 @@ function render() {
       paintCell(d, state[r][c], ship(r - 1, c), ship(r + 1, c), ship(r, c - 1), ship(r, c + 1),
                 gt[r][c], info.bad.has(r * n + c));
       if (wrong.has(r * n + c)) d.classList.add('wrong');
-      d.addEventListener('click', () => onCell(r, c));
       grid.appendChild(d);
     }
     const lab = document.createElement('div');
@@ -1415,14 +1416,59 @@ function labClass(cur, target) {
   return '';
 }
 
-function onCell(r, c) {
-  if (locked[r][c] || frozen) return;
-  wrong = new Set();
-  state[r][c] = (state[r][c] + 1) % 3;   // 空白 → 水 → 船 → 空白
-  if (mode === 'daily') saveBoard();
-  if (mode === 'exam') exChanged();
-  render();
+/* 點一下：空白 → 水 → 船 → 空白。按住拖曳：從起點沿直線連續塗上同一種狀態。
+ * 起點的下一個狀態就是「筆」：塗水、塗船，或（起點是船時）擦成空白。
+ * 塗水／塗船只改空白格；船最多塗到「本題最大船格數」，超過的格子維持空白。 */
+function cellAt(x, y) {
+  const el = document.elementFromPoint(x, y), g = $('grid');
+  if (!el || !g.contains(el)) return null;
+  const d = el.closest('.cell'); if (!d) return null;
+  const n = puzzle.size, i = Array.prototype.indexOf.call(g.children, d);
+  return i < 0 ? null : [Math.floor(i / (n + 1)), i % (n + 1)];
 }
+(function () {
+  const g = $('grid');
+  let G = null;                              // 目前的手勢
+  const maxLen = () => Math.max.apply(null, Object.keys(puzzle.fleet).map(Number));
+  function apply(r, c) {                     // 依起點與目前格，重算整條線
+    const n = puzzle.size, base = G.base, pen = G.pen;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) state[i][j] = base[i][j];
+    const vert = Math.abs(r - G.r0) >= Math.abs(c - G.c0), cells = [];
+    if (vert) { const st = r >= G.r0 ? 1 : -1; for (let i = G.r0; i !== r + st; i += st) cells.push([i, G.c0]); }
+    else { const st = c >= G.c0 ? 1 : -1; for (let j = G.c0; j !== c + st; j += st) cells.push([G.r0, j]); }
+    const lim = pen === 2 ? maxLen() : n;
+    cells.forEach((p, k) => {
+      if (k >= lim) return;                  // 超過最大船格數：維持原樣（空白）
+      if (locked[p[0]][p[1]]) return;
+      if (k === 0 || pen === 0 || base[p[0]][p[1]] === 0) state[p[0]][p[1]] = pen;
+    });
+  }
+  g.addEventListener('pointerdown', e => {
+    if (e.button > 0 || G || frozen) return;
+    const p = cellAt(e.clientX, e.clientY); if (!p || p[1] >= puzzle.size) return;
+    if (locked[p[0]][p[1]]) return;
+    const n = puzzle.size;
+    G = { r0: p[0], c0: p[1], last: p[0] + ',' + p[1], base: state.map(r => r.slice()), pen: (state[p[0]][p[1]] + 1) % 3, moved: false, id: e.pointerId };
+    try { g.setPointerCapture(e.pointerId); } catch (x) { /* 不支援就算了 */ }
+    wrong = new Set(); dragging = true; apply(p[0], p[1]); render();
+  });
+  g.addEventListener('pointermove', e => {
+    if (!G || e.pointerId !== G.id) return;
+    const p = cellAt(e.clientX, e.clientY); if (!p || p[1] >= puzzle.size) return;
+    const key = p[0] + ',' + p[1]; if (key === G.last) return;
+    G.last = key; G.moved = true; apply(p[0], p[1]); render();
+  });
+  const end = e => {
+    if (!G || e.pointerId !== G.id) return;
+    const cancel = e.type === 'pointercancel', base = G.base;
+    G = null; dragging = false;
+    if (cancel) { for (let i = 0; i < base.length; i++) for (let j = 0; j < base.length; j++) state[i][j] = base[i][j]; }
+    if (mode === 'daily') saveBoard();
+    if (mode === 'exam') exChanged();
+    render();
+  };
+  g.addEventListener('pointerup', end); g.addEventListener('pointercancel', end);
+})();
 
 /* ============ 自由練習（可選難度、預填格數） ============ */
 const sizeSel = $('size'), lvlSel = $('lvl'), hintsInput = $('hints'), seedInput = $('seed'), msgEl = $('msg');
