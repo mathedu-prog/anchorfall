@@ -53,6 +53,8 @@
     --sh2:0 8px 22px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.25);
     --sh3:0 18px 44px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.3);
   }
+  .lic { width:1.15em; height:1.15em; vertical-align:-.2em; flex:none; }
+  .day .mk.st .lic { width:11px; height:11px; vertical-align:-1px; }
   .ic { width:1.15em; height:1.15em; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none; vertical-align:-.2em; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body { margin:0; background-color:var(--bg); color:var(--ink);
@@ -483,6 +485,40 @@
 <div id="toast"></div>
 
 <script>
+/* 錨界圖示庫：取自 Lucide（lucide-static v1.74.0，ISC 授權，https://lucide.dev）。24×24 線條圖示，顏色跟著 currentColor。 */
+var LI=(function(){
+  var D={
+    cal:[0,'<path d="M8 2v3" /><path d="M16 2v3" /><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" />'],
+    target:[0,'<circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />'],
+    exam:[0,'<rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" />'],
+    spkOn:[0,'<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /><path d="M16 9a5 5 0 0 1 0 6" /><path d="M19.364 18.364a9 9 0 0 0 0-12.728" />'],
+    spkOff:[0,'<path d="M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298z" /><path d="m16.5 14.5 5-5" /><path d="m16.5 9.5 5 5" />'],
+    help:[0,'<circle cx="12" cy="12" r="10" /><path d="M9 9.5a3 2.5 0 016 0c0 2-2 2-3 3.5" /><path d="M12 17h.01" />'],
+    lock:[0,'<rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />'],
+    unlock:[0,'<rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" />'],
+    anchor:[0,'<path d="M12 6v16" /><path d="m19 13 2-1a9 9 0 0 1-18 0l2 1" /><path d="M9 11h6" /><circle cx="12" cy="4" r="2" />'],
+    star:[1,'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />'],
+    starO:[0,'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />'],
+    check:[0,'<path d="M20 6 9 17l-5-5" />'],
+    cross:[0,'<path d="M18 6 6 18" /><path d="m6 6 12 12" />'],
+    skip:[1,'<path d="M21 4v16" /><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" />'],
+    pencil:[0,'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" />'],
+    trash:[0,'<path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />'],
+    teacher:[0,'<circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" />'],
+    warn:[0,'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /><path d="M12 9v4" /><path d="M12 17h.01" />'],
+    timer:[0,'<line x1="10" x2="14" y1="2" y2="2" /><line x1="12" x2="15" y1="14" y2="11" /><circle cx="12" cy="14" r="8" />'],
+    rotate:[0,'<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />'],
+    arrowL:[0,'<path d="m12 19-7-7 7-7" /><path d="M19 12H5" />'],
+    arrowR:[0,'<path d="M5 12h14" /><path d="m12 5 7 7-7 7" />'],
+    undo:[0,'<path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" />'],
+    diamond:[1,'<path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z" />'],
+    backspace:[0,'<path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z" /><path d="m12 9 6 6" /><path d="m18 9-6 6" />'],
+    diamondO:[0,'<path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z" />']
+  };
+  function ic(n,cls){var d=D[n];return '<svg class="lic'+(cls?' '+cls:'')+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="'+(d[0]?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d[1]+'</svg>'}
+  ic.names=Object.keys(D);
+  return ic;
+})();
 
 /* ========== 圖示（統一 24px 格線、1.8 線寬的線條圖示）與深淺色主題 ========== */
 const ICONS = {
@@ -886,7 +922,7 @@ function freshBoard() {
 function buildPad(n) {
   $('pad').style.setProperty('--pn', n + 1);
   $('pad').innerHTML = [...Array(n).keys()].map(i => '<button data-n="'+(i+1)+'">'+(i+1)+'</button>').join('')
-                     + '<button data-n="0">⌫</button>';
+                     + '<button data-n="0">' + LI('backspace') + '</button>';
 }
 
 const TIER_NAME = ['簡單', '中等', '困難'];
@@ -1173,7 +1209,7 @@ const STEPS = [
     body: '<ul style="line-height:1.8;padding-left:20px"><li>外圈數字等於盤面大小（如 3×3 的 3）：這排一定由矮到高排好。</li><li>外圈數字是 <b>1</b>：最靠近你的那格一定是<b>最高的樓</b>。</li><li>顏色較深、有粗框的格子是<b>題目預先給好的</b>，不能修改。</li><li>先填最確定的，再用「每列每行不重複」慢慢推理。</li></ul>' },
   { title: '每日月曆',
     demo: () => '<div class="demo" style="height:auto;font-size:36px;gap:14px;color:var(--blue)">' + ic('calendar') + ic('arrow') + ic('building') + ic('arrow') + ic('unlock') + '</div>',
-    body: '<ul style="line-height:1.8;padding-left:20px"><li>每天一題，盤面大小與難度由系統排程隨機決定。</li><li>點月曆上的封面，揭開當天的謎題。</li><li>在<b>目標時間</b>內解出今日謎題（達標），才能解鎖<b>過期謎題</b>。</li><li>過期謎題在目標時間內完成可得 ★。</li></ul>' },
+    body: '<ul style="line-height:1.8;padding-left:20px"><li>每天一題，盤面大小與難度由系統排程隨機決定。</li><li>點月曆上的封面，揭開當天的謎題。</li><li>在<b>目標時間</b>內解出今日謎題（達標），才能解鎖<b>過期謎題</b>。</li><li>過期謎題在目標時間內完成可得 ' + LI('star') + '。</li></ul>' },
   { title: '怎麼操作？',
     demo: () => '<div class="demo" style="height:auto;gap:8px"><div class="cell h2" style="width:48px;height:48px">2</div><div class="cell h2 dup" style="width:48px;height:48px">2</div><div class="clue ok" style="width:48px;height:48px">3<small>→</small></div></div>',
     body: '<p>① 點選格子，再按下方的數字（電腦也可用鍵盤與方向鍵）。</p><p>② 同列或同行重複時，格子會變<b style="color:#d64545">紅色</b>。</p><p>③ 外圈數字條件滿足時，會變<b style="color:#2e9e5b">綠色</b>。</p><p>④ 全部填好後按「檢查答案」。填錯了可按「復原」或「清紅格」；不確定的數字先按「試探」再填（藍色虛線），對了按「採用」，不對按「撤回」。卡關時可按「提示」（每次加 30 秒）。上方可選盤面大小（3×3～7×7）與難度（簡單／中等／困難）。準備好了嗎？</p>' }
@@ -1471,7 +1507,7 @@ function recStars(key) {
   const it = CAL.items[key]; return it && r.best ? starsOf(it.n, it.tier, r.best) : (r.met ? 2 : 1);
 }
 const totalStars = () => Object.keys(RECS).reduce((s, k) => s + recStars(k), 0);
-const starTxt = s => '★'.repeat(s) + '☆'.repeat(3 - s);
+const starTxt = s => s + ' 顆星';
 function addDaysKey(key, d) { const p = key.split('-').map(Number), x = new Date(Date.UTC(p[0], p[1] - 1, p[2] + d)); return x.getUTCFullYear() + '-' + pad2(x.getUTCMonth() + 1) + '-' + pad2(x.getUTCDate()); }
 function skView(s, today) {                             // 昨天以前就斷了（沒有補簽卡可救）→ 顯示 0
   const alive = s.last === today || s.last === addDaysKey(today, -1) || (s.last === addDaysKey(today, -2) && s.freezes > 0);
@@ -1662,7 +1698,7 @@ function renderCalendar() {
       solved++; stars += recStars(key);
       const c = document.createElement('canvas'); c.className = 'mini'; el.appendChild(c);
       drawMini(c, rec.board);
-      el.insertAdjacentHTML('beforeend', '<span class="dn">' + d + '</span><span class="mk st">' + '★'.repeat(recStars(key)) + '<i>' + '★'.repeat(3 - recStars(key)) + '</i></span><span class="tm">' + fmt(rec.best) + '</span>');
+      el.insertAdjacentHTML('beforeend', '<span class="dn">' + d + '</span><span class="mk st">' + LI('star').repeat(recStars(key)) + '<i>' + LI('star').repeat(3 - recStars(key)) + '</i></span><span class="tm">' + fmt(rec.best) + '</span>');
     } else {
       el.innerHTML = skylineSvg(key) + '<span class="dn">' + d + '</span>'
         + (st === 'today' ? '<span class="tag">今日</span>' : st === 'open' ? '<span class="tag">補題</span>' : '')
@@ -1672,7 +1708,7 @@ function renderCalendar() {
     el.onclick = () => onDay(key, el);
     grid.appendChild(el);
   }
-  $('calStat').textContent = avail ? '本月已完成 ' + solved + ' / ' + avail + ' 天　★ 本月 ' + stars + ' 顆' : '';
+  $('calStat').innerHTML = avail ? '本月已完成 ' + solved + ' / ' + avail + ' 天　' + LI('star') + ' 本月 ' + stars + ' 顆' : '';
   fitCalendar();
 }
 function renderUnlockBar() {
@@ -1804,7 +1840,7 @@ function enterDaily(key, puz) {
   buildPad(N);
   $('gameTitle').innerHTML = ic('calendar') + mo + ' 月 ' + da + ' 日・' + (key === CAL.today ? '今日謎題' : '補題');
   $('sub').textContent = N + ' × ' + N + ' · ' + TIER_NAME[puz.rating] + ' · 數字 1～' + N + '，每列每行不重複';
-  $('badge').innerHTML = mo + ' 月 ' + da + ' 日・' + (key === CAL.today ? '今日謎題' : '補題') + '<span class="tgt"> ｜ 目標時間 ' + fmt(DAILY.par) + (key === CAL.today ? '（達標可解鎖過期謎題）' : '（達標得 ★）') + '</span>';
+  $('badge').innerHTML = mo + ' 月 ' + da + ' 日・' + (key === CAL.today ? '今日謎題' : '補題') + '<span class="tgt"> ｜ 目標時間 ' + fmt(DAILY.par) + (key === CAL.today ? '（達標可解鎖過期謎題）' : '（達標得 ' + LI('star') + '）') + '</span>';
   sel = null; $('msg').textContent = ''; $('msg').className = 'msg';
   $('btnReplay').style.display = 'none'; $('btnRetry').style.display = 'none';
   const rec = RECS[key];
