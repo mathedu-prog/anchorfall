@@ -153,6 +153,11 @@ label.l{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
     <div class="cards" id="cards"></div>
   </section>
 
+  <section id="eggSec" aria-labelledby="hEgg" hidden>
+    <h2 id="hEgg">彩蛋</h2>
+    <div class="cards" id="eggBox"></div>
+  </section>
+
   <section class="lamps" aria-labelledby="hLamps">
     <h2 id="hLamps">三燈紀錄</h2>
     <div class="sum"><span>今日亮燈 <b id="tonight">0</b> / 3</span><span>三燈齊亮的連續天數 <b id="run">0</b></span></div>
@@ -238,8 +243,21 @@ function renderCards(){
     box.appendChild(c);
   });
 }
+var SOMA_URL="./soma.html";
+function renderEgg(){
+  var sec=$("eggSec");
+  if(count(today)<3){sec.hidden=true;return}
+  sec.hidden=false;
+  var box=$("eggBox");box.innerHTML="";
+  var c=document.createElement("div");c.className="card";c.style.setProperty("--c","var(--reward)");
+  c.innerHTML='<div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="txt"><div class="dom">彩蛋</div><h3>索瑪方塊</h3><div class="info">三燈齊亮的獎勵。七塊方塊，隨你拼。</div></div><div class="row"></div>';
+  var a=document.createElement("a");a.className="go";a.textContent="開始";
+  a.href=SOMA_URL;
+  c.querySelector(".row").appendChild(a);box.appendChild(c);
+}
 function count(d){var x=S.done[d]||{};return (x.boat?1:0)+(x.tower?1:0)+(x.land?1:0)}
 function renderLamps(){
+  renderEgg();
   $("tonight").textContent=count(today);
   var run=0,d=count(today)===3?today:add(today,-1);
   while(count(d)===3){run++;d=add(d,-1)}
