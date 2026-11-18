@@ -14,6 +14,9 @@
   header { width: 100%; max-width: 520px; text-align: center; }
   h1 { font-size: 18px; margin: 0 0 4px; color: var(--navy); letter-spacing: 1px; }
   #nav { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .sdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+  .ic { width: 1.15em; height: 1.15em; vertical-align: -.2em; flex: none; }
+  .icw { display: inline-flex; vertical-align: middle; }
   .navbtn { border: 1px solid #c3d0de; background: #fff; border-radius: 20px; padding: 6px 14px; font-size: 15px; color: var(--navy); }
   .navbtn.on { background: var(--navy); color: #fff; border-color: var(--navy); }
   section { width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; }
@@ -36,7 +39,7 @@
          display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform .15s, box-shadow .15s; }
   .day { gap: 2px; }
   .day .num { font-size: 16px; font-weight: 800; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,.3); }
-  .day .mark { font-size: 13px; line-height: 1; }
+  .day .mark { font-size: 13px; line-height: 1; } .day .mark .ic { width: 15px; height: 15px; }
   .day .chip { font-size: 9px; font-weight: 700; letter-spacing: 1px; line-height: 1; }
   .st-today .num { margin-top: 5px; }
   .day .ribbon { position: absolute; top: 0; right: 0; background: #ffd23f; color: #5a3d00; font-size: 9px; font-weight: 800; padding: 1px 6px; border-bottom-left-radius: 8px; }
@@ -57,7 +60,9 @@
   @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(124,58,237,.45), 0 2px 6px rgba(20,60,120,.35); }
                      50% { box-shadow: 0 0 0 6px rgba(124,58,237,0), 0 2px 6px rgba(20,60,120,.35); } }
   #legend { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; font-size: 12px; color: var(--muted); margin-top: 6px; max-width: var(--calw, 420px); }
-  #legend i { display: inline-block; width: 12px; height: 12px; border-radius: 4px; vertical-align: -2px; margin-right: 4px; }
+  #legend i { display: inline-block; width: 16px; height: 16px; border-radius: 5px; margin-right: 5px; position: relative; flex: none; }
+  #legend span { display: inline-flex; align-items: center; }
+  #legend i .ic { position: absolute; inset: 2px; width: 12px; height: 12px; color: #fff; }
   #calFoot { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px; max-width: var(--calw, 420px); line-height: 1.4; }
   #calErr { color: #b3261e; font-size: 14px; text-align: center; margin: 10px 0; }
 
@@ -148,7 +153,7 @@
   #cele { position: fixed; inset: 0; z-index: 75; display: none; flex-direction: column; align-items: center; padding: 8px 10px 12px; background: #061b30; color: #fff; overflow: hidden; }
   #cele.show { display: flex; }
   #ceTop { align-self: stretch; display: flex; gap: 8px; justify-content: flex-end; z-index: 4; position: relative; }
-  #ceTop button { background: rgba(0,35,60,.55); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 16px; padding: 4px 12px; font-size: 14px; }
+  #ceTop button { background: rgba(0,35,60,.55); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 16px; padding: 4px 12px; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; }
   #ceTop button[hidden] { display: none; }
   #ceStage { flex: 1 1 0; min-height: 0; width: 100%; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
              perspective: 1100px; perspective-origin: 50% 100%; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
@@ -159,7 +164,7 @@
   .ce-n, .ce-cn { display: flex; align-items: center; justify-content: center; font-weight: 700; color: rgba(255,255,255,.78); text-shadow: 0 1px 3px rgba(0,25,50,.95), 0 0 6px rgba(0,25,50,.7); transition: color .3s, transform .3s; font-size: 15px; }
   .ce-cn { height: 26px; }
   .ce-n.ok, .ce-cn.ok { color: #7cf0b4; transform: scale(1.15); }
-  .ce-n.ok::after, .ce-cn.ok::after { content: "✓"; font-size: 11px; margin-left: 1px; }
+  .ce-n.ok::after, .ce-cn.ok::after { content: ''; display: inline-block; width: 11px; height: 11px; margin-left: 2px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E") center/contain no-repeat; }
   .ce-ship { position: absolute; width: 0; height: 0; pointer-events: none; }
   .ce-hull { position: absolute; opacity: 0; }
   .ce-hq { position: absolute; left: 50%; top: 50%; }
@@ -169,7 +174,7 @@
   .ce-conf { position: absolute; top: -14px; width: 8px; height: 12px; opacity: 0; }
   .ce-boat { position: absolute; left: 0; top: 7%; max-width: none; }
   .ce-boat svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 0 8px rgba(190,255,245,.5)); }
-  #ceHint { font-size: 13px; color: rgba(255,255,255,.8); text-shadow: 0 1px 4px rgba(0,20,40,.9); margin: 4px 0; opacity: 0; transition: opacity .5s; min-height: 18px; z-index: 3; position: relative; }
+  #ceHint { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: rgba(255,255,255,.8); text-shadow: 0 1px 4px rgba(0,20,40,.9); margin: 4px 0; opacity: 0; transition: opacity .5s; min-height: 18px; z-index: 3; position: relative; }
   #ceHint.in { opacity: 1; }
   #ceCard { background: #fff; color: #10243e; border-radius: 14px; padding: 12px 20px; text-align: center; width: min(92vw, 380px); min-height: 138px;
             opacity: 0; transform: translateY(14px) scale(.96); transition: opacity .5s, transform .5s; pointer-events: none; z-index: 4; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,.45); }
@@ -306,11 +311,11 @@
 <header>
   <h1>發現小船 BATTLESHIPS</h1>
   <nav id="nav">
-    <button id="navCal" class="navbtn on">📅 解題月曆</button>
-    <button id="navPrac" class="navbtn">🎯 自由練習</button>
-    <button id="navExam" class="navbtn" hidden>📝 測驗</button>
-    <button id="navSnd" class="navbtn" title="過關動畫的音效（海浪聲）">🔇 音效</button>
-    <button id="help" class="navbtn">❓ 教學</button>
+    <button id="navCal" class="navbtn on">解題月曆</button>
+    <button id="navPrac" class="navbtn">自由練習</button>
+    <button id="navExam" class="navbtn" hidden>測驗</button>
+    <button id="navSnd" class="navbtn" title="過關動畫的音效（海浪聲）"><span class="icw" data-ic="spkOff"></span> 音效</button>
+    <button id="help" class="navbtn">教學</button>
   </nav>
 </header>
 
@@ -328,11 +333,11 @@
   <div id="calGrid"></div>
   <div id="legend">
     <span><i style="background:linear-gradient(160deg,#1d4ed8,#0e7490)"></i>未揭開</span>
-    <span><i style="background:linear-gradient(160deg,#f8cb5a,#e09a1a)"></i>★ 準時完成</span>
-    <span><i style="background:linear-gradient(160deg,#bfc9d3,#8e9aa6)"></i>✓ 補題完成</span>
-    <span><i style="background:#7b8794"></i>🔒 補題未解鎖</span>
+    <span><i style="background:linear-gradient(160deg,#f8cb5a,#e09a1a)"><span class="icw" data-ic="star"></span></i>準時完成</span>
+    <span><i style="background:linear-gradient(160deg,#bfc9d3,#8e9aa6)"><span class="icw" data-ic="check"></span></i>補題完成</span>
+    <span><i style="background:#7b8794"><span class="icw" data-ic="lock"></span></i>補題未解鎖</span>
     <span><i style="background:#e3e8ee"></i>未開放</span>
-    <span id="lgExam" hidden>📝 測驗</span>
+    <span id="lgExam" hidden>測驗</span>
   </div>
   <div id="calFoot"></div>
 </section>
@@ -382,10 +387,10 @@
 </div></div>
 <div id="cele" role="dialog" aria-modal="true" aria-label="過關動畫">
   <div id="ceScene" aria-hidden="true"></div>
-  <div id="ceTop"><button id="ceSnd" title="音效開／關">🔇</button><button id="ceSkip" title="跳過動畫">跳過 ⏭</button><button id="ceClose" title="關閉">✕</button></div>
+  <div id="ceTop"><button id="ceSnd" title="音效開／關"><span class="icw" data-ic="spkOff"></span></button><button id="ceSkip" title="跳過動畫">跳過 <span class="icw" data-ic="skip"></span></button><button id="ceClose" title="關閉"><span class="icw" data-ic="cross"></span></button></div>
   <div id="ceStage"><div id="ceB3"></div></div>
   <div id="ceFx"></div>
-  <div id="ceHint">👆 拖曳可以轉動視角</div>
+  <div id="ceHint"><span class="icw" data-ic="rotate"></span> 拖曳可以轉動視角</div>
   <div id="ceCard"><h3 id="ceCardT"></h3><div class="sub" id="ceCardS"></div><div class="cardbtns" id="ceBtns"></div></div>
 </div>
 <div id="dlg" class="overlay"><div class="card">
@@ -411,6 +416,40 @@
 </div>
 
 <script>
+/* 錨界圖示庫：取自 Lucide（lucide-static v1.74.0，ISC 授權，https://lucide.dev）。24×24 線條圖示，顏色跟著 currentColor。 */
+var IC=(function(){
+  var D={
+    cal:[0,'<path d="M8 2v3" /><path d="M16 2v3" /><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" />'],
+    target:[0,'<circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />'],
+    exam:[0,'<rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" />'],
+    spkOn:[0,'<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /><path d="M16 9a5 5 0 0 1 0 6" /><path d="M19.364 18.364a9 9 0 0 0 0-12.728" />'],
+    spkOff:[0,'<path d="M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298z" /><path d="m16.5 14.5 5-5" /><path d="m16.5 9.5 5 5" />'],
+    help:[0,'<circle cx="12" cy="12" r="10" /><path d="M9 9.5a3 2.5 0 016 0c0 2-2 2-3 3.5" /><path d="M12 17h.01" />'],
+    lock:[0,'<rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />'],
+    unlock:[0,'<rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" />'],
+    anchor:[0,'<path d="M12 6v16" /><path d="m19 13 2-1a9 9 0 0 1-18 0l2 1" /><path d="M9 11h6" /><circle cx="12" cy="4" r="2" />'],
+    star:[1,'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />'],
+    starO:[0,'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />'],
+    check:[0,'<path d="M20 6 9 17l-5-5" />'],
+    cross:[0,'<path d="M18 6 6 18" /><path d="m6 6 12 12" />'],
+    skip:[1,'<path d="M21 4v16" /><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" />'],
+    pencil:[0,'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" />'],
+    trash:[0,'<path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />'],
+    teacher:[0,'<circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" />'],
+    warn:[0,'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /><path d="M12 9v4" /><path d="M12 17h.01" />'],
+    timer:[0,'<line x1="10" x2="14" y1="2" y2="2" /><line x1="12" x2="15" y1="14" y2="11" /><circle cx="12" cy="14" r="8" />'],
+    rotate:[0,'<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />'],
+    arrowL:[0,'<path d="m12 19-7-7 7-7" /><path d="M19 12H5" />'],
+    arrowR:[0,'<path d="M5 12h14" /><path d="m12 5 7 7-7 7" />'],
+    undo:[0,'<path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" />'],
+    diamond:[1,'<path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z" />'],
+    diamondO:[0,'<path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z" />']
+  };
+  function ic(n,cls){var d=D[n];return '<svg class="ic'+(cls?' '+cls:'')+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="'+(d[0]?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d[1]+'</svg>'}
+  ic.names=Object.keys(D);
+  return ic;
+})();
+document.querySelectorAll('[data-ic]').forEach(function (e) { e.innerHTML = IC(e.dataset.ic); });
 /* ================= 船隊設定 =================
  * 6×6 沿用附件；8×8 以上用標準船隊（4×1, 3×2, 2×3, 1×4，共 20 格）。
  * 7×7 我自訂為 14 格，想改可以直接改這裡。
@@ -1390,15 +1429,15 @@ function render() {
   const msg = $('msg');
   if (mode === 'exam') { msg.textContent = ''; msg.className = ''; }
   else if (info.solved && mode === 'daily') {
-    msg.textContent = '✅ 已完成' + (frozen ? '（按「重來」可重玩）' : ''); msg.className = 'win';
+    msg.innerHTML = IC('check') + ' 已完成' + (frozen ? '（按「重來」可重玩）' : ''); msg.className = 'win';
     if (!solvedHandled) { solvedHandled = true; onDailySolved(); }
   }
   else if (info.solved && cheated) { msg.textContent = '（已顯示答案）'; msg.className = ''; }
   else if (info.solved) {
-    msg.textContent = '🎉 過關！'; msg.className = 'win';
+    msg.innerHTML = IC('anchor') + ' 過關！'; msg.className = 'win';
     if (!solvedHandled) {
       solvedHandled = true;
-      celebrate({ kind: 'prac', title: '🎉 過關！', sub: puzzle.size + '×' + puzzle.size,
+      celebrate({ kind: 'prac', title: IC('anchor') + ' 過關！', sub: puzzle.size + '×' + puzzle.size,
                   buttons: [{ t: '看看棋盤' }, { t: '再來一題', primary: true, fn: () => $('gen').click() }] });
     }
   }
@@ -1721,7 +1760,7 @@ function renderCal() {
     const date = cal.month + '-' + PAD(d);
     const st = statusOf(date, today, U), rec = prog.days[date];
     const meta = cal.days[date];
-    const mark = { today: '⚓', past: '⚓', locked: '🔒', ontime: '★', late: '✓' }[st] || '';
+    const mark = { today: IC('anchor'), past: IC('anchor'), locked: IC('lock'), ontime: IC('star'), late: IC('check') }[st] || '';
     const showLv = (st === 'ontime' || st === 'late' || (rec && rec.o)) && meta && LVNAME[meta.level];
     const b = document.createElement('button');
     b.type = 'button';
@@ -1731,7 +1770,7 @@ function renderCal() {
     b.setAttribute('aria-label', mdLabel(date) + ' ' + ({ today: '今日謎題', past: '可補題', locked: '補題未解鎖', ontime: '已準時完成', late: '已補題完成', future: '尚未開放', before: '' }[st]));
     const xe = exOnDate(date);
     if (xe) b.classList.add('hasexam');
-    b.innerHTML = (xe ? '<span class="exm">📝</span>' : '') + (st === 'today' ? '<span class="ribbon">今日</span>' : '') +
+    b.innerHTML = (xe ? '<span class="exm">' + IC('exam') + '</span>' : '') + (st === 'today' ? '<span class="ribbon">今日</span>' : '') +
       '<span class="num">' + d + '</span><span class="mark">' + mark + '</span>' +
       (showLv ? '<span class="chip">' + LVNAME[meta.level] + '</span>' : '');
     b.addEventListener('click', () => onDayClick(date, b));
@@ -1741,10 +1780,10 @@ function renderCal() {
   const ban = $('calBanner');
   if (U.unlocked) {
     ban.className = 'ban ok';
-    ban.innerHTML = '🔓 <b>補題已解鎖</b>' + (U.mode === 'today' ? '：今天可以補解任何過期的謎題' : '：可以隨時補解過期的謎題');
+    ban.innerHTML = IC('unlock') + ' <b>補題已解鎖</b>' + (U.mode === 'today' ? '：今天可以補解任何過期的謎題' : '：可以隨時補解過期的謎題');
   } else {
     ban.className = 'ban lock';
-    ban.innerHTML = '🔒 <b>補題未解鎖</b>：' + U.text + '即可解鎖' + (U.mode === 'today' ? '今天的補題' : '（' + U.cur + '/' + U.need + '）') +
+    ban.innerHTML = IC('lock') + ' <b>補題未解鎖</b>：' + U.text + '即可解鎖' + (U.mode === 'today' ? '今天的補題' : '（' + U.cur + '/' + U.need + '）') +
       ' <button id="goToday">去解今日謎題</button>';
     $('goToday').addEventListener('click', goToday);
   }
@@ -1753,7 +1792,7 @@ function renderCal() {
   $('calStats').textContent = '已完成 ' + ds.length + ' 題（準時 ' + ot + '）　連續準時 ' + streak() + ' 天';
   $('calFoot').innerHTML = '每天（台北時間）一題，<b>難度隨機</b>。' +
     '<br>進度存在這個瀏覽器，換裝置不會同步。' +
-    (storageOk ? '' : '<br>⚠ 這個瀏覽器無法儲存進度，關閉頁面後紀錄會消失。');
+    (storageOk ? '' : '<br>' + IC('warn') + ' 這個瀏覽器無法儲存進度，關閉頁面後紀錄會消失。');
   exBanner();
   fitCal();
 }
@@ -1774,7 +1813,7 @@ function toast(t) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2300);
 }
 function showDlg(title, body, buttons) {
-  $('dlgT').textContent = title; $('dlgB').innerHTML = body;
+  $('dlgT').innerHTML = title; $('dlgB').innerHTML = body;
   const box = $('dlgBtns'); box.innerHTML = '';
   buttons.forEach(b => {
     const x = document.createElement('button'); x.textContent = b.text; if (b.primary) x.className = 'primary';
@@ -1801,7 +1840,7 @@ function onDayClick(date, el) {
   if (st === 'locked') {
     shake(el);
     const U = unlockInfo();
-    showDlg('🔒 補題尚未解鎖',
+    showDlg(IC('lock') + ' 補題尚未解鎖',
       '過期的謎題要先「達標」才能補解。<br><b>達標條件：' + U.text + '</b>' + (U.mode === 'count' ? '<br>目前 ' + U.cur + ' / ' + U.need : '') +
       '<br>達標後就能回來補解 ' + mdLabel(date) + '的謎題。',
       [{ text: '知道了' }, { text: '去解今日謎題', primary: true, fn: goToday }]);
@@ -1817,7 +1856,7 @@ function revealHtml(date, data, isToday) {
   return '<div class="rdate">' + date.slice(5, 7) + '/' + date.slice(8, 10) + '</div><div class="rwd">週' + WD[weekday(date)] + '</div>' +
     '<div class="rlv"><span class="tag t' + t + '">' + LVNAME[data.level] + '</span></div>' +
     '<div class="rinfo">' + data.size + '×' + data.size + '　預填 ' + data.hints + ' 格</div>' +
-    '<div class="rtip">' + (isToday ? '準時挑戰 ★' : '補題挑戰 ✓') + '</div>';
+    '<div class="rtip">' + (isToday ? '準時挑戰 ' + IC('star') : '補題挑戰 ' + IC('check')) + '</div>';
 }
 
 async function playOpen(el, date, dp) {
@@ -1834,7 +1873,7 @@ async function playOpen(el, date, dp) {
   card.style.left = ((vw - W) / 2) + 'px'; card.style.top = ((vh - H) / 2) + 'px';
   const reveal = document.createElement('div'); reveal.className = 'reveal'; reveal.innerHTML = revealHtml(date, null, isToday);
   const door = document.createElement('div'); door.className = 'door';
-  door.innerHTML = '<div class="dnum">' + Number(date.slice(8)) + '</div><div class="danchor">⚓</div><div class="dknob"></div>';
+  door.innerHTML = '<div class="dnum">' + Number(date.slice(8)) + '</div><div class="danchor">' + IC('anchor') + '</div><div class="dknob"></div>';
   card.appendChild(reveal); card.appendChild(door); stage.appendChild(card); document.body.appendChild(stage);
   dp.then(d => { reveal.innerHTML = revealHtml(date, d, isToday); }, () => {});
 
@@ -1899,7 +1938,7 @@ function enterDaily(date, data) {
   showView('game');
   const isToday = date === todayNow();
   $('seedinfo').textContent = mdLabel(date) + '　' + data.size + '×' + data.size + '　預填 ' + data.hints + ' 格';
-  $('techinfo').innerHTML = '難度 <span class="tag t' + LVTIER[data.level] + '">' + LVNAME[data.level] + '</span>　' + (isToday ? '準時挑戰 ★' : '補題 ✓');
+  $('techinfo').innerHTML = '難度 <span class="tag t' + LVTIER[data.level] + '">' + LVNAME[data.level] + '</span>　' + (isToday ? '準時挑戰 ' + IC('star') : '補題 ' + IC('check'));
   render();
 }
 
@@ -1913,10 +1952,10 @@ function onDailySolved() {
   frozen = true;
   const U = unlockInfo();
   const t = LVTIER[dailyData.level];
-  const title = rec.t ? '🌟 準時完成！' : '✔ 補題完成';
+  const title = rec.t ? IC('star') + ' 準時完成！' : IC('check') + ' 補題完成';
   let sub = '<div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:6px 0"><img alt="" src="data:image/webp;base64,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" style="width:40px;height:40px;border-radius:50%;border:1px solid #cfd6de"><span style="font-size:14px">「記下了。」<span style="opacity:.65;font-size:12px">— 岑禾</span></span></div>' + mdLabel(dailyDate) + '　<span class="tag t' + t + '">' + LVNAME[dailyData.level] + '</span>　' + dailyData.size + '×' + dailyData.size;
   if (rec.t) sub += '<br>連續準時 ' + streak() + ' 天<br><a href="./index.html#done-boat" style="display:inline-block;margin-top:6px;padding:6px 14px;border-radius:14px;background:#2563c9;color:#fff;text-decoration:none;font-weight:700">回錨界入口，點亮海測</a>';
-  if (!wasUnlocked && U.unlocked) sub += '<br>🔓 <b>達標！補題已解鎖</b>，可以回月曆補解過期謎題了';
+  if (!wasUnlocked && U.unlocked) sub += '<br>' + IC('unlock') + ' <b>達標！補題已解鎖</b>，可以回月曆補解過期謎題了';
   else if (!U.unlocked && U.mode === 'count') sub += '<br>補題解鎖進度 ' + U.cur + '/' + U.need;
   celebrate({
     kind: rec.t ? 'ontime' : 'late', title: title, sub: sub, confetti: !wasUnlocked && U.unlocked,
@@ -2034,8 +2073,8 @@ const TUT = [
   { title: '解題月曆：每天一題',
     text: '<p>「解題月曆」每天 00:00 由系統自動出一題，<b>難度隨機</b>（簡單／中等／困難），從 2026/11/01 開始。</p>' +
           '<p>• 點月曆上的日期，<b>封面會翻開</b>，露出當天的難度，然後進入棋盤。<br>' +
-          '• 當天解出來是金色的 <b>★ 準時完成</b>。<br>' +
-          '• 錯過的日子是過期謎題，要先<b>達標</b>才能補解：預設是「完成今日謎題」，達標後當天就能補解任何過期謎題，補完是銀色的 <b>✓</b>。<br>' +
+          '• 當天解出來是金色的 <b>' + IC('star') + ' 準時完成</b>。<br>' +
+          '• 錯過的日子是過期謎題，要先<b>達標</b>才能補解：預設是「完成今日謎題」，達標後當天就能補解任何過期謎題，補完是銀色的 <b>' + IC('check') + '</b>。<br>' +
           '• 未到的日期還沒有出題，點了也看不到。</p>',
     minis: [] },
   { title: '怎麼操作',
@@ -2247,9 +2286,9 @@ const Snd = {
 };
 Snd.load();
 function syncSndUI() {
-  const t = Snd.on ? '🔊 音效' : '🔇 音效';
-  $('navSnd').textContent = t; $('navSnd').classList.toggle('on', Snd.on);
-  $('ceSnd').textContent = Snd.on ? '🔊' : '🔇';
+  const t = IC(Snd.on ? 'spkOn' : 'spkOff') + ' 音效';
+  $('navSnd').innerHTML = t; $('navSnd').classList.toggle('on', Snd.on);
+  $('ceSnd').innerHTML = IC(Snd.on ? 'spkOn' : 'spkOff');
 }
 function toggleSound() {
   Snd.on = !Snd.on; Snd.save(); syncSndUI();
@@ -3171,7 +3210,7 @@ function exOnDate(date) {                           // 這一天有沒有考試�
   return ex.list.find(e => (ex.me.teacher ? e.status === 'open' : true) && (e.startAt ? taipeiDate(e.startAt) : exNowDate()) === date) || null;
 }
 function exCalClick(e, date, el) {
-  const title = '📝 ' + e.title;
+  const title = e.title;
   if (ex.me.teacher) {
     showDlg(title, '你是老師，這裡可以預覽考卷（不計分、不留紀錄）。', [
       { text: '解當天謎題', fn: () => { hideDlg(); openCover(date, el); } },
@@ -3193,7 +3232,7 @@ function exBanner() {
   $('lgExam').hidden = !(ex.me && ex.list.some(x => ex.me.teacher ? x.status === 'open' : true));
   if (!e) { b.hidden = true; return; }
   b.hidden = false;
-  b.innerHTML = '📝 <b>測驗：' + esc(e.title) + '</b>　' + (e.limitMin ? '限時 ' + e.limitMin + ' 分鐘' : '不限時') +
+  b.innerHTML = IC('exam') + ' <b>測驗：' + esc(e.title) + '</b>　' + (e.limitMin ? '限時 ' + e.limitMin + ' 分鐘' : '不限時') +
     '<button id="exBanGo">' + (e.my ? '繼續作答' : '進入考試') + '</button>';
   $('exBanGo').addEventListener('click', () => exStart(e.id));
 }
@@ -3214,7 +3253,7 @@ function exLoadList() {
 }
 function exRenderList() {
   const me = ex.me;
-  let h = '<div class="exhead"><h2>📝 測驗</h2>' + (me.teacher ? '<button data-a="teacher">🧑‍🏫 老師管理</button>' : '') + '</div>' +
+  let h = '<div class="exhead"><h2>測驗</h2>' + (me.teacher ? '<button data-a="teacher">' + IC('teacher') + ' 老師管理</button>' : '') + '</div>' +
     '<div class="exnote">沒有解完的題目也會依<b>完成度</b>計分：船擺對加分、擺錯會扣分；水格標記也有分數，但比船格少。船全部擺對就是滿分，水可以不填。題目可以依自己的順序作答。</div>';
   if (!ex.list.length) h += '<div class="exmsg">目前沒有可以作答的考卷。</div>';
   ex.list.forEach(e => {
@@ -3293,7 +3332,7 @@ function exTick() {
   const left = c.deadline - (Date.now() + c.off);
   if (left <= 0) { clearInterval(ex.timer); el.textContent = '時間到'; toast('時間到，自動交卷'); exSubmit(true); return; }
   const m = Math.floor(left / 60000), s = Math.floor(left % 60000 / 1000);
-  el.textContent = '⏱ ' + m + ':' + (s < 10 ? '0' : '') + s; el.classList.toggle('low', left < 5 * 60000);
+  el.innerHTML = IC('timer') + ' ' + m + ':' + (s < 10 ? '0' : '') + s; el.classList.toggle('low', left < 5 * 60000);
 }
 
 /* ---------- 存檔 ---------- */
@@ -3353,11 +3392,11 @@ function exSubmit() {
 function exShowResult(title, r) {
   clearInterval(ex.timer); mode = 'exam'; showView('exam');
   if (r.hidden) {
-    $('exBody').innerHTML = '<div class="exhead"><h2>📝 ' + esc(title || '') + '</h2></div><div class="exscore" style="font-size:18px">已交卷。<br>成績由老師公布。</div>' +
+    $('exBody').innerHTML = '<div class="exhead"><h2>' + esc(title || '') + '</h2></div><div class="exscore" style="font-size:18px">已交卷。<br>成績由老師公布。</div>' +
       (r.status === 'auto' ? '<div class="exnote">時間到，系統已自動交卷。</div>' : '') + '<div class="act"><button class="primary" data-a="list">返回</button></div>';
     return;
   }
-  let h = '<div class="exhead"><h2>📝 ' + esc(title || '') + '</h2></div><div class="exscore"><b>' + r.total + '</b> / ' + r.max + ' 分</div>' +
+  let h = '<div class="exhead"><h2>' + esc(title || '') + '</h2></div><div class="exscore"><b>' + r.total + '</b> / ' + r.max + ' 分</div>' +
     (r.status === 'auto' ? '<div class="exnote">時間到，系統已自動交卷。</div>' : '') + '<div class="exres">';
   r.per.forEach(p => {
     h += '<div class="exrr"><span>第 ' + p.no + ' 題</span><div class="exbar"><i style="width:' + Math.round(p.pct * 100) + '%"></i></div><span>' + p.pts + ' / ' + p.points + '</span></div>';
@@ -3383,7 +3422,7 @@ function exTLoad() {
   Promise.all([gs('bankList'), gs('examList')]).then(v => { ex.bank = v[0]; ex.list = v[1].exams; exTRender(); }).catch(exErr);
 }
 function exTabs() {
-  return '<div class="exhead"><h2>🧑‍🏫 老師管理</h2><button data-a="list">← 考卷列表</button></div><div class="extabs">' +
+  return '<div class="exhead"><h2>' + IC('teacher') + ' 老師管理</h2><button data-a="list">← 考卷列表</button></div><div class="extabs">' +
     [['bank', '題庫'], ['exams', '考卷'], ['mon', '監考'], ['res', '成績']].map(t => '<button data-a="tab" data-t="' + t[0] + '" class="' + (ex.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>').join('') + '</div>';
 }
 /* ---- 監考：每 15 秒自動更新 ---- */
@@ -3412,7 +3451,7 @@ function exMonLoad() {
       '<div class="extbl"><table><tr><th></th><th>姓名</th><th>Email</th><th>狀態</th><th>開始</th><th>最後存檔</th><th></th></tr>' +
       d.students.map(s => {
         const live = s.status === 'doing' && d.now - s.savedAt < 100000, stale = s.status === 'doing' && !live;
-        return '<tr><td>' + (live ? '🟢' : stale ? '🟡' : '') + '</td><td>' + esc(s.name) + '</td><td>' + esc(s.email) + '</td><td>' + nm[s.status] + '</td><td>' + fmtT(s.startedAt) +
+        return '<tr><td>' + (live ? '<i class="sdot" style="background:#2eb872"></i>' : stale ? '<i class="sdot" style="background:#e0b020"></i>' : '') + '</td><td>' + esc(s.name) + '</td><td>' + esc(s.email) + '</td><td>' + nm[s.status] + '</td><td>' + fmtT(s.startedAt) +
           '</td><td' + (stale ? ' style="color:#b3261e"' : '') + '>' + (s.status === 'doing' ? ago(d.now - s.savedAt) : fmtT(s.submittedAt)) + '</td><td><button data-a="rsreset" data-x="' + esc(exMon.id) + '" data-e="' + esc(s.email) + '">重置</button></td></tr>';
       }).join('') + '</table></div>';
     $('monAt').textContent = '更新於 ' + new Date().toTimeString().slice(0, 8);
@@ -3431,12 +3470,12 @@ function exTBank() {
     '<select id="gLvl"><option value="easy">簡單</option><option value="medium" selected>中等</option><option value="hard">困難</option><option value="expert">專家</option></select>' +
     '<select id="gCnt"><option>1</option><option>2</option><option>3</option></select> 題' +
     '<button id="gGo" class="primary" data-a="gen">出題</button></div><div id="gMsg" class="exhint"></div>' +
-    '<div class="exinline"><button data-a="editor">✏️ 自訂出題</button></div></div>' +
+    '<div class="exinline"><button data-a="editor">' + IC('pencil') + ' 自訂出題</button></div></div>' +
     '<div class="expanel"><b>題庫（' + ex.bank.length + ' 題）</b>';
   if (!ex.bank.length) h += '<div class="exhint">題庫是空的，先自動出幾題或自訂出題。</div>';
   h += '<div class="exlist">' + ex.bank.map(b => '<label class="exitem"><input type="checkbox" data-id="' + b.id + '"> <span>' + esc(b.name) + '</span> ' + exTagOf(b.tier) +
     ' <small>' + b.size + '×' + b.size + '・' + b.source + '・提示 ' + b.hints + '</small></label>').join('') + '</div>' +
-    (ex.bank.length ? '<div class="exinline"><button data-a="bdel">🗑 刪除勾選的題目</button></div>' : '') + '</div>';
+    (ex.bank.length ? '<div class="exinline"><button data-a="bdel">' + IC('trash') + ' 刪除勾選的題目</button></div>' : '') + '</div>';
   $('exBody').innerHTML = h;
 }
 function exGen() {
@@ -3463,7 +3502,7 @@ function edInit(n) {
 function exEditor(n) {
   if (!ed || n) edInit(n || 6);
   const e = ed, cs = Math.max(26, Math.min(40, Math.floor((window.innerWidth - 40) / (e.n + 1))));
-  let h = '<div class="exhead"><h2>✏️ 自訂出題</h2><button data-a="tab" data-t="bank">← 返回題庫</button></div>' +
+  let h = '<div class="exhead"><h2>' + IC('pencil') + ' 自訂出題</h2><button data-a="tab" data-t="bank">← 返回題庫</button></div>' +
     '<div class="exinline"><select id="edN">' + [6, 7, 8, 9, 10].map(k => '<option value="' + k + '"' + (k === e.n ? ' selected' : '') + '>' + k + '×' + k + '</option>').join('') + '</select>' +
     '<input id="edName" placeholder="題目名稱（可留空）" maxlength="40" value="' + esc(e.name) + '"></div>' +
     '<div class="exinline">船隊：' + [1, 2, 3, 4].map(L => L + ' 格 <input class="edf" data-l="' + L + '" type="number" min="0" max="9" value="' + (e.fleet[L] || 0) + '"> 艘').join('　') + '</div>' +
@@ -3515,7 +3554,7 @@ function edVerify(cb) {
     if (res.count === 0) { msg.className = 'exhint bad'; msg.textContent = '這題沒有解，請檢查行列數字、船隊與提示。'; return; }
     if (res.count > 1) { msg.className = 'exhint bad'; msg.textContent = '這題有多組解，請多加提示讓答案唯一。'; return; }
     const t = rate(p).tier;
-    msg.className = 'exhint good'; msg.innerHTML = '✔ 答案唯一。難度：' + exTagOf(t) + '　提示 ' + p.givens.length + ' 格';
+    msg.className = 'exhint good'; msg.innerHTML = IC('check') + ' 答案唯一。難度：' + exTagOf(t) + '　提示 ' + p.givens.length + ' 格';
     if (cb) cb(p);
   }, 30);
 }
@@ -3559,9 +3598,9 @@ function ebRender() {
     const b = bm[q.qid];
     h += '<div class="ebq"><span class="n">' + (i + 1) + '</span><span class="nm">' + (b ? esc(b.name) + ' ' + exTagOf(b.tier) : '<i>（已刪除的題目）</i>') + '</span>' +
       '<input class="ebp" data-i="' + i + '" type="number" min="0" value="' + q.points + '"> 分' +
-      '<button data-a="ebup" data-i="' + i + '">↑</button><button data-a="ebdn" data-i="' + i + '">↓</button><button data-a="ebrm" data-i="' + i + '">✕</button></div>';
+      '<button data-a="ebup" data-i="' + i + '">↑</button><button data-a="ebdn" data-i="' + i + '">↓</button><button data-a="ebrm" data-i="' + i + '">' + IC('cross') + '</button></div>';
   });
-  h += '<div class="exinline"><button data-a="ebpick">從題庫挑題</button><button data-a="ebrand">隨機抽題</button><button data-a="ebeq">平均配分到 100 分</button></div><div class="exinline"><button data-a="ebp30">⭐ 套用「30 分鐘」建議配置</button></div><div class="exhint">建議配置：6×6 簡單 2 題（各 15 分）＋7×7 中等 2 題（各 20 分）＋8×8 困難 1 題（30 分），限時 30 分鐘。題庫不足的題型可以自動補出。</div><div id="ebPanel"></div></div>' +
+  h += '<div class="exinline"><button data-a="ebpick">從題庫挑題</button><button data-a="ebrand">隨機抽題</button><button data-a="ebeq">平均配分到 100 分</button></div><div class="exinline"><button data-a="ebp30">' + IC('star') + ' 套用「30 分鐘」建議配置</button></div><div class="exhint">建議配置：6×6 簡單 2 題（各 15 分）＋7×7 中等 2 題（各 20 分）＋8×8 困難 1 題（30 分），限時 30 分鐘。題庫不足的題型可以自動補出。</div><div id="ebPanel"></div></div>' +
     '<div class="exinline"><button data-a="ebsave" data-s="draft">儲存為草稿</button><button class="primary" data-a="ebsave" data-s="open">儲存並開放</button></div>';
   $('exBody').innerHTML = h;
 }
