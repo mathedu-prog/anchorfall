@@ -69,6 +69,9 @@
            background:var(--card); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line2), var(--sh1); }
   button.primary { background:var(--accent); color:var(--accent-ink); font-weight:700; box-shadow:var(--sh1); }
   button:active { transform:translateY(1px); }
+  a.hubbtn { font:inherit; cursor:pointer; border-radius:12px; padding:8px 14px; display:inline-flex; align-items:center; justify-content:center; gap:.4em; text-decoration:none; background:var(--card); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line2), var(--sh1); }
+  #homeView .bar a.hubbtn { height:44px; border-radius:14px; }
+  .gbar a.hubbtn { min-width:38px; padding:8px; }
 
   /* 難度選擇 */
   .levels { display:flex; gap:8px; margin-bottom:12px; }
@@ -268,6 +271,7 @@
   .gbar h1 { flex:1; margin:0; font-size:16px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .gbar button { padding:6px 10px; font-size:14px; }
   .gbar .timer { min-width:48px; }
+  @media (max-width:380px){ .gbar { gap:4px; } .gbar .seg button { padding:6px 4px; font-size:12px; white-space:nowrap; } .gbar .timer { min-width:40px; padding:6px 6px; } .gbar button.mbtn, .gbar a.hubbtn { min-width:32px; padding:6px; } }
   .seg { position:relative; display:grid; grid-template-columns:1fr 1fr; padding:3px; border-radius:999px; background:var(--card2); border:1px solid var(--line); box-shadow:inset 0 1px 2px rgba(24,50,80,.08); width:min(100%, 260px); }
   #homeSeg { margin:0 auto 6px; }
   .seg button { position:relative; z-index:1; background:none; border:none; box-shadow:none; padding:7px 4px; font-size:14px; font-weight:600; color:var(--muted); border-radius:999px; cursor:pointer; white-space:nowrap; transition:color .25s var(--ease-out); }
@@ -372,6 +376,7 @@
       <button id="btnMusic" class="mbtn" aria-label="背景音樂"></button>
       <button id="btnTheme2" class="mbtn" aria-label="切換深淺色"></button>
       <button id="btnHelp2">教學</button>
+      <a class="hubbtn" href="./index.html" title="回錨界入口"><span data-lic="anchor"></span>入口</a>
     </div>
   </div>
 
@@ -382,6 +387,7 @@
       <h1 id="gameTitle" hidden></h1>
       <button class="timerbtn" id="timerBtn" aria-pressed="false" aria-label="顯示或隱藏時間" title="點一下隱藏／顯示時間"><span class="timer" id="timer">00:00</span><i data-ic="eye"></i><i data-ic="eyeoff"></i></button>
       <button id="btnMusic2" class="mbtn" aria-label="背景音樂"></button>
+      <a class="hubbtn mbtn" href="./index.html" aria-label="回錨界入口" title="回錨界入口"><span data-lic="anchor"></span></a>
       <button id="btnHelp" class="mbtn" aria-label="教學"><i data-ic="help"></i></button>
     </div>
     <div class="sub" id="sub"></div>
@@ -521,6 +527,7 @@ var LI=(function(){
 })();
 
 /* ========== 圖示（統一 24px 格線、1.8 線寬的線條圖示）與深淺色主題 ========== */
+document.querySelectorAll('[data-lic]').forEach(function (e) { e.style.display = 'inline-flex'; e.innerHTML = LI(e.getAttribute('data-lic')); });
 const ICONS = {
   building:'<path d="M4 21V9l6-3v15M10 21V12l6-2v11M2.5 21h19"/><path d="M6.5 11.5h1M6.5 15h1M13 14.5h1M13 18h1"/>',
   grid:'<rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M9.3 4v16M14.7 4v16M4 9.3h16M4 14.7h16"/>',

@@ -35,6 +35,7 @@ h1{font-family:var(--font-display);font-weight:900;font-size:clamp(28px,6vw,40px
 .tools{display:flex;gap:8px;align-items:center}
 .ibtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:13px;min-height:36px}
 .ibtn:hover{border-color:var(--accent)}
+a.ibtn{display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:inherit}
 .daybar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
 .daybar .nav{display:flex;gap:6px;align-items:center}
 .date{font-weight:700;font-variant-numeric:tabular-nums;min-width:8.5em;text-align:center}
@@ -198,6 +199,7 @@ html,body{overflow-x:hidden}
       <div class="sub">定位數獨 · 地測 · 洛盤</div>
     </div>
     <div class="tools">
+      <a class="ibtn" id="btnHub" href="./index.html" title="回錨界入口"><span class="icw" data-ic="anchor"></span>入口</a>
       <button class="ibtn" id="btnRules" type="button">玩法</button>
       <button class="ibtn" id="btnCal" type="button">錨曆</button>
       <button class="ibtn" id="btnPrac" type="button">自由練習</button>
