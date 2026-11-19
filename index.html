@@ -123,7 +123,7 @@ label.l{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 #intro .skip{right:max(12px,env(safe-area-inset-right,0px))}
 #intro .snd{left:max(12px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:4px}
 #intro .snd svg{width:16px;height:16px}
-.bgmbtn{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:5px;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;font-size:12px;padding:8px 13px;min-height:40px;box-shadow:0 4px 16px rgba(0,0,0,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
+.bgmbtn{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:5px;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;font-size:12px;padding:8px 13px;min-height:40px;box-shadow:0 4px 16px rgba(0,0,0,.14);cursor:pointer}
 .bgmbtn[hidden]{display:none}.bgmbtn svg{width:17px;height:17px}.bgmbtn[aria-pressed="true"]{color:var(--accent,currentColor)}
 .bgmbtn[aria-pressed="true"] svg{animation:bgmpulse 2.6s ease-in-out infinite}@keyframes bgmpulse{50%{transform:scale(1.14)}}
 @media (prefers-reduced-motion:reduce){.bgmbtn[aria-pressed="true"] svg{animation:none}}
@@ -396,12 +396,15 @@ var BGMEngine=(function(){
   function Player(ctx,out,season){
     var S=SONGS[season]||SONGS.autumn,self=this;
     var eighth=60/S.bpm*(S.eighth||0.5),per=S.per,total=per*16;
-    // 殘響（較短、較省 CPU）
-    var len=Math.floor(ctx.sampleRate*1.7),buf=ctx.createBuffer(2,len,ctx.sampleRate);
-    for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.4)}
-    var conv=ctx.createConvolver();conv.buffer=buf;
-    var bus=ctx.createGain(),wet=ctx.createGain();wet.gain.value=.3;
-    bus.connect(out);bus.connect(conv);conv.connect(wet);wet.connect(out);
+    // 輕量殘響：兩條回授延遲線（取代卷積殘響，低階手機也跑得動）
+    var bus=ctx.createGain(),wet=ctx.createGain();wet.gain.value=.5;
+    var dl=[ctx.createDelay(1),ctx.createDelay(1)],fb=[ctx.createGain(),ctx.createGain()],tone=ctx.createBiquadFilter();
+    tone.type="lowpass";tone.frequency.value=2400;
+    dl[0].delayTime.value=.19;dl[1].delayTime.value=.29;
+    bus.connect(out);
+    for(var q=0;q<2;q++){fb[q].gain.value=.42;bus.connect(dl[q]);dl[q].connect(tone);dl[q].connect(fb[q]);fb[q].connect(dl[q])}
+    tone.connect(wet);wet.connect(out);
+    var conv=tone;
     var amb=null;
     // 環境音：8 秒雜訊、首尾交叉淡化，避免循環接縫的「啪」聲
     if(S.amb){
@@ -424,7 +427,7 @@ var BGMEngine=(function(){
       g.gain.exponentialRampToValueAtTime(.001,t+dec);g.gain.linearRampToValueAtTime(0,t+dec+.06);
     }
     function piano(f,t,dur,vel){
-      var g=ctx.createGain(),dec=Math.min(2.2,Math.max(.8,2.2*Math.pow(440/f,.3))),o=ctx.createOscillator();
+      var g=ctx.createGain(),dec=Math.min(1.7,Math.max(.7,1.7*Math.pow(440/f,.3))),o=ctx.createOscillator();
       o.setPeriodicWave(WP);o.frequency.value=f;env(g,t,vel*1.5,dec);o.connect(g);g.connect(bus);o.start(t);o.stop(t+dec+.1);
     }
     function bell(f,t,dur,vel){
@@ -462,7 +465,7 @@ var BGMEngine=(function(){
     };
     this.dispose=function(t){
       if(amb){try{amb.src.stop(t);amb.lfo.stop(t)}catch(e){}}
-      setTimeout(function(){try{bus.disconnect();wet.disconnect();conv.disconnect();if(amb)amb.nodes.forEach(function(n){n.disconnect()})}catch(e){}},4500);
+      setTimeout(function(){try{bus.disconnect();wet.disconnect();tone.disconnect();dl.forEach(function(n){n.disconnect()});fb.forEach(function(n){n.disconnect()});if(amb)amb.nodes.forEach(function(n){n.disconnect()})}catch(e){}},4500);
     };
   }
   return {Player:Player,SONGS:SONGS};
@@ -494,7 +497,7 @@ function bgmSync(){
   if(BG.on||BG.starting)return;
   try{
     var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-    if(!actx)actx=new AC();
+    if(!actx){try{actx=new AC({latencyHint:"playback",sampleRate:22050})}catch(e){actx=new AC()}}
     BG.starting=true;
     var go=function(){if(actx.state==="running"&&IS.snd&&$("intro").hidden&&!document.hidden)bgmReal();else BG.starting=false};
     if(actx.state==="running")go();else{var r=actx.resume();if(r&&r.then)r.then(go,function(){BG.starting=false});else BG.starting=false}
@@ -558,7 +561,7 @@ function renderSeason(){
   var cv=document.createElement("canvas");cv.id="fall";cv.setAttribute("aria-hidden","true");document.body.appendChild(cv);
   var ctx=cv.getContext("2d"),W=0,H=0,DPR=1,ps=[],dk=false,last=0;
   function isDark(){var t=document.documentElement.getAttribute("data-theme");return t==="dark"||(t!=="light"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)}
-  function size(){DPR=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR}
+  function size(){DPR=1;W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR}
   var COL={spring:["#f4b6c6","#f9d0da","#eaa0b5"],autumn:["#d9731f","#c2452d","#e0a526","#a85a1c"]};
   function mk(first){
     var r=Math.random(),s=SEASON,o={x:Math.random()*W,y:first?Math.random()*H:-20,ph:Math.random()*6.28,rot:Math.random()*6.28,vr:(Math.random()-.5)*1.2,sw:.4+Math.random()*.8};
@@ -570,6 +573,7 @@ function renderSeason(){
   function init(){size();var n=Math.round(Math.max(10,Math.min(18,W/26)));ps=[];for(var i=0;i<n;i++)ps.push(mk(true))}
   function leaf(o){ctx.beginPath();ctx.moveTo(0,-o.r);ctx.quadraticCurveTo(o.r*.9,0,0,o.r);ctx.quadraticCurveTo(-o.r*.9,0,0,-o.r);ctx.fill();ctx.strokeStyle="rgba(0,0,0,.18)";ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(0,-o.r);ctx.lineTo(0,o.r);ctx.stroke()}
   function frame(t){
+    if(t-last<30){requestAnimationFrame(frame);return}
     var dt=Math.min(.05,(t-last)/1000||.016);last=t;
     if(!document.hidden){
       ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
