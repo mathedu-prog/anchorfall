@@ -250,8 +250,10 @@ var FACES = [
   { n: [1, 0, 0],  v: [[1,0,0],[1,1,0],[1,1,1],[1,0,1]], l: 0.74 },
   { n: [-1, 0, 0], v: [[0,0,0],[0,1,0],[0,1,1],[0,0,1]], l: 0.58 },
   { n: [0, 0, 1],  v: [[0,0,1],[1,0,1],[1,1,1],[0,1,1]], l: 0.82 },
-  { n: [0, 0, -1], v: [[0,0,0],[1,0,0],[1,1,0],[0,1,0]], l: 0.64 }
+  { n: [0, 0, -1], v: [[0,0,0],[1,0,0],[1,1,0],[0,1,0]], l: 0.64 },
+  { n: [0, -1, 0], v: [[0,0,0],[1,0,0],[1,0,1],[0,0,1]], l: 0.5 }
 ];
+function lightOf(n) { return Math.max(.5, .66 + (n[1] > 0 ? .34 : .34) * n[1] + .08 * n[0] + (n[2] > 0 ? .16 : .02) * n[2]); }
 function rgb(hex) { return [parseInt(hex.substr(1, 2), 16), parseInt(hex.substr(3, 2), 16), parseInt(hex.substr(5, 2), 16)]; }
 function shade(c, f, add) { return 'rgb(' + Math.min(255, c[0] * f + add | 0) + ',' + Math.min(255, c[1] * f + add | 0) + ',' + Math.min(255, c[2] * f + add | 0) + ')'; }
 function dark() { return !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
@@ -297,8 +299,8 @@ function draw() {
     if (p.rot) ang = -(1 - easeOut(Math.min(1, (now - p.rot.t0) / p.rot.dur))) * Math.PI / 2;
     p.cells.forEach(function (c) {
       var cx = p.ox + c[0] + .5 + p.vo[0], cy = p.oy + c[1] + .5 + p.vo[1] + p.vl, cz = p.oz + c[2] + .5 + p.vo[2];
-      if (p.rot && ang) { var q = rotPt(p.rot, [cx, cy, cz], ang); cx = q[0]; cy = q[1]; cz = q[2]; }
-      cubes.push({ x: cx - .5, y: cy - .5, z: cz - .5, pi: pi, d: proj(cx, cy, cz)[2] });
+      var rc = (p.rot && ang) ? rotPt(p.rot, [cx, cy, cz], ang) : [cx, cy, cz];
+      cubes.push({ x: cx - .5, y: cy - .5, z: cz - .5, pi: pi, rr: (p.rot && ang) ? p.rot : null, ang: ang, d: proj(rc[0], rc[1], rc[2])[2] });
     });
   });
   cubes.sort(function (a, b) { return a.d - b.d; });
@@ -306,16 +308,23 @@ function draw() {
   cubes.forEach(function (q) {
     var p = P[q.pi], isSel = q.pi === sel, base = rgb(p.c);
     FACES.forEach(function (f) {
-      var nz1 = -f.n[0] * sn + f.n[2] * cs;
-      if (f.n[1] * sp2 + nz1 * cp <= 0.001) return;
-      var pts = f.v.map(function (v) { return proj(q.x + v[0], q.y + v[1], q.z + v[2]); });
+      var nv = f.n;
+      if (q.rr) nv = rotPt({ ax: q.rr.ax, c: [0, 0, 0] }, f.n, q.ang);
+      var nz1 = -nv[0] * sn + nv[2] * cs;
+      if (nv[1] * sp2 + nz1 * cp <= 0.001) return;
+      var pts = f.v.map(function (v) {
+        var w = [q.x + v[0], q.y + v[1], q.z + v[2]];
+        if (q.rr) w = rotPt(q.rr, w, q.ang);
+        return proj(w[0], w[1], w[2]);
+      });
+      var fl = q.rr ? lightOf(nv) : f.l;
       var mnY = 1e9, mxY = -1e9; pts.forEach(function (t) { if (t[1] < mnY) mnY = t[1]; if (t[1] > mxY) mxY = t[1]; });
-      var k = (dk ? .86 : 1) * (.56 + .44 * f.l), lf = isSel ? 22 : 0;
+      var k = (dk ? .86 : 1) * (.56 + .44 * fl), lf = isSel ? 22 : 0;
       var gr = ctx.createLinearGradient(0, mnY, 0, mxY);
       gr.addColorStop(0, shade(base, k * 1.07, lf + 10)); gr.addColorStop(1, shade(base, k * .93, lf));
       ctx.beginPath(); quadPath(pts); ctx.fillStyle = gr; ctx.fill();
       ctx.lineJoin = 'round'; ctx.lineWidth = 1; ctx.strokeStyle = dk ? 'rgba(0,0,0,.35)' : 'rgba(20,30,50,.2)'; ctx.stroke();
-      if (f.n[1] === 1) { // 頂面邊緣高光
+      if (nv[1] > .999) { // 頂面邊緣高光
         ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[1][0], pts[1][1]); ctx.lineTo(pts[2][0], pts[2][1]); ctx.lineTo(pts[3][0], pts[3][1]); ctx.closePath();
         ctx.strokeStyle = 'rgba(255,255,255,.34)'; ctx.lineWidth = 1; ctx.stroke();
       }
