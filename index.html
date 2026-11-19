@@ -396,14 +396,20 @@ var BGMEngine=(function(){
   function Player(ctx,out,season,lite){
     var S=SONGS[season]||SONGS.autumn,self=this;
     var eighth=60/S.bpm*(S.eighth||0.5),per=S.per,total=per*16;
-    // 輕量殘響：兩條回授延遲線（取代卷積殘響，低階手機也跑得動）
-    var bus=ctx.createGain(),wet=ctx.createGain();wet.gain.value=.5;
-    var dl=[ctx.createDelay(1),ctx.createDelay(1)],fb=[ctx.createGain(),ctx.createGain()],tone=ctx.createBiquadFilter();
-    tone.type="lowpass";tone.frequency.value=2400;
-    dl[0].delayTime.value=.19;dl[1].delayTime.value=.29;
+    // 殘響：精簡模式用「越往後越暗」的卷積殘響（離線只算一次）；即時模式維持輕量延遲線
+    var bus=ctx.createGain(),wet=ctx.createGain(),tone=ctx.createBiquadFilter(),dl=[],fb=[];
     bus.connect(out);
-    for(var q=0;q<2;q++){fb[q].gain.value=.42;bus.connect(dl[q]);dl[q].connect(tone);dl[q].connect(fb[q]);fb[q].connect(dl[q])}
-    tone.connect(wet);wet.connect(out);
+    if(lite){
+      var rl=Math.floor(ctx.sampleRate*1.9),ib=ctx.createBuffer(1,rl,ctx.sampleRate),id=ib.getChannelData(0),lp1=0;
+      for(var ri=0;ri<rl;ri++){var tt=ri/rl,a=Math.exp(-tt*5.2),c=.55*Math.exp(-tt*4);lp1+=((Math.random()*2-1)-lp1)*c;id[ri]=lp1*a*(ri<ctx.sampleRate*.012?ri/(ctx.sampleRate*.012):1)}
+      var cv=ctx.createConvolver();cv.buffer=ib;wet.gain.value=.55;
+      bus.connect(cv);cv.connect(wet);wet.connect(out);tone=cv;
+    }else{
+      wet.gain.value=.5;dl=[ctx.createDelay(1),ctx.createDelay(1)];fb=[ctx.createGain(),ctx.createGain()];
+      tone.type="lowpass";tone.frequency.value=2400;dl[0].delayTime.value=.19;dl[1].delayTime.value=.29;
+      for(var q=0;q<2;q++){fb[q].gain.value=.42;bus.connect(dl[q]);dl[q].connect(tone);dl[q].connect(fb[q]);fb[q].connect(dl[q])}
+      tone.connect(wet);wet.connect(out);
+    }
     var conv=tone;
     var amb=null;
     // 環境音：8 秒雜訊、首尾交叉淡化，避免循環接縫的「啪」聲
@@ -417,18 +423,24 @@ var BGMEngine=(function(){
       var lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=S.amb==="waves"?.1:.07;lg.gain.value=ag.gain.value*.9;lfo.connect(lg);lg.connect(ag.gain);
       src.connect(bp);bp.connect(ag);ag.connect(out);src.start();lfo.start();amb={src:src,lfo:lfo,nodes:[bp,ag,lg]};
     }
-    function jit(){return Math.random()*.01-.003}
+    function jit(){return lite?Math.random()*.03-.008:Math.random()*.01-.003}
     // 單一振盪器 + 自訂波形，取代原本每音 4 個振盪器
-    var WP=ctx.createPeriodicWave(new Float32Array([0,0,0,0,0]),new Float32Array([0,1,.3,.1,.04]));
+    var WP=ctx.createPeriodicWave(new Float32Array(8),new Float32Array([0,1,.55,.32,.2,.12,.07,.04]));
     var WB=ctx.createPeriodicWave(new Float32Array([0,0,0]),new Float32Array([0,1,.18]));
     var WS=ctx.createPeriodicWave(new Float32Array([0,0,0,0,0,0]),new Float32Array([0,1,.5,.33,.2,.12]));
     function env(g,t,vel,dec){
       g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vel,t+.008);
       g.gain.exponentialRampToValueAtTime(.001,t+dec);g.gain.linearRampToValueAtTime(0,t+dec+.06);
     }
+    var NZ=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.05),ctx.sampleRate),nzd=NZ.getChannelData(0);
+    for(var zi=0;zi<nzd.length;zi++)nzd[zi]=(Math.random()*2-1)*Math.pow(1-zi/nzd.length,2);
     function piano(f,t,dur,vel){
-      var g=ctx.createGain(),dec=Math.min(1.7,Math.max(.7,1.7*Math.pow(440/f,.3))),o=ctx.createOscillator();
-      o.setPeriodicWave(WP);o.frequency.value=f;env(g,t,vel*1.5,dec);o.connect(g);g.connect(bus);o.start(t);o.stop(t+dec+.1);
+      var dec=Math.min(3.2,Math.max(1.1,2.8*Math.pow(440/f,.3))),g=ctx.createGain(),lp=ctx.createBiquadFilter();
+      lp.type="lowpass";lp.Q.value=.4;
+      lp.frequency.setValueAtTime(Math.min(8000,f*(5+vel*42)),t);lp.frequency.exponentialRampToValueAtTime(Math.max(500,f*2.4),t+dec*.55);
+      env(g,t,vel*1.5,dec);lp.connect(g);g.connect(bus);
+      [-2.2,2.2].forEach(function(dt){var o=ctx.createOscillator();o.setPeriodicWave(WP);o.frequency.value=f;o.detune.value=dt+(Math.random()-.5)*1.2;o.connect(lp);o.start(t);o.stop(t+dec+.1)});
+      if(lite){var ns=ctx.createBufferSource(),nb2=ctx.createBiquadFilter(),ng=ctx.createGain();ns.buffer=NZ;nb2.type="bandpass";nb2.frequency.value=Math.min(3500,f*2.5);nb2.Q.value=.8;ng.gain.value=vel*.35;ns.connect(nb2);nb2.connect(ng);ng.connect(bus);ns.start(t)}
     }
     function bell(f,t,dur,vel){
       var g=ctx.createGain(),dec=2;env(g,t,vel,dec);g.connect(bus);
@@ -486,7 +498,7 @@ function bgmRender(cb){
     var oc=new OAC(1,n,sr),m=oc.createGain();m.gain.value=1;m.connect(oc.destination);
     var p=new BGMEngine.Player(oc,m,SEASON,true);p.reset(.05);p.run(loop+tail);
     var done=function(buf){
-      var src=buf.getChannelData(0),L=Math.floor(loop*sr),out=actx.createBuffer(1,L,sr),d=out.getChannelData(0),i,pk=0;
+      var src=buf.getChannelData(0),L=Math.floor(loop*sr),out=oc.createBuffer(1,L,sr),d=out.getChannelData(0),i,pk=0;
       for(i=0;i<L;i++)d[i]=src[i];
       for(i=0;i<src.length-L&&i<L;i++)d[i]+=src[L+i];   // 尾音折回開頭，循環無縫
       for(i=0;i<L;i++){var a=Math.abs(d[i]);if(a>pk)pk=a}
@@ -614,6 +626,6 @@ renderToday();renderSeason();renderCards();renderLamps();
 if(!IS.off&&IS.last!==today&&!returning)playIntro();
 else if(returning&&IS.last!==today){IS.seen=true;IS.last=today;isave()}
 applyHash();
-$("bgmbtn").hidden=false;sndUI();bgmSync();
+$("bgmbtn").hidden=false;sndUI();bgmSync();if(IS.snd)setTimeout(function(){bgmRender(function(){bgmSync()})},400);
 })();
 </script>
