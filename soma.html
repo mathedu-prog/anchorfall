@@ -55,7 +55,57 @@ button,a{font:inherit;color:inherit;-webkit-appearance:none;appearance:none}
 #cen img{height:78px;width:auto;display:block;filter:drop-shadow(0 2px 3px var(--shadow))}
 #cen div{border-radius:16px 16px 16px 5px;padding:8px 12px;font-size:13px;line-height:1.5;margin-bottom:12px;max-width:min(62vw,260px)}
 #cen small{display:block;color:var(--mute);font-size:11px}
-@media (prefers-reduced-motion:reduce){#dock,#win,#toast,#cen{transition:none}}
+#hud{position:fixed;z-index:10;left:50%;top:calc(max(10px,env(safe-area-inset-top)) + 54px);transform:translateX(-50%);display:flex;align-items:center;gap:10px;height:40px;padding:0 6px 0 14px;border-radius:20px;font-size:13.5px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+#hud[hidden]{display:none}
+#hud .mono{font-variant-numeric:tabular-nums;color:var(--accent);min-width:42px;text-align:center}
+#hud button{height:32px;min-width:32px;padding:0 8px;border:0;border-radius:16px;background:transparent;display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--ink);font-size:12px}
+#hud button:active{background:var(--hair)}
+body.chal #toast{top:calc(max(10px,env(safe-area-inset-top)) + 102px)}
+#sheetBg{position:fixed;inset:0;z-index:20;background:rgba(10,18,30,.32);opacity:0;pointer-events:none;transition:opacity .3s}
+#sheetBg.on{opacity:1;pointer-events:auto}
+#sheet{position:fixed;z-index:21;left:50%;bottom:0;width:min(100%,520px);max-height:86dvh;overflow:auto;overscroll-behavior:contain;transform:translate(-50%,105%);transition:transform .45s cubic-bezier(.2,.9,.25,1.02);border-radius:26px 26px 0 0;padding:16px 16px max(18px,env(safe-area-inset-bottom));background:var(--glassSolid);-webkit-backdrop-filter:none;backdrop-filter:none}
+#sheet.on{transform:translate(-50%,0)}
+@media (min-width:700px){#sheet{bottom:auto;top:50%;border-radius:26px;transform:translate(-50%,-40%);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.25,1.02),opacity .25s;max-height:82dvh}#sheet.on{transform:translate(-50%,-50%);opacity:1}}
+.sh-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sh-h b{font-size:18px;letter-spacing:.06em}
+.sh-x{width:38px;height:38px;border-radius:50%;border:0;background:var(--hair);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+.sh-d{margin:2px 0 12px;font-size:13px;line-height:1.6;color:var(--mute)}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--hair);background:transparent;border-radius:14px;padding:9px 4px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px;font-weight:600}
+.chip small{font-size:11px;font-weight:400;color:var(--mute)}
+.chip.on{background:var(--accent);color:var(--onaccent);border-color:var(--accent)}
+.chip.on small{color:var(--onaccent);opacity:.8}
+.btn1{width:100%;height:48px;border:0;border-radius:16px;background:var(--accent);color:var(--onaccent);font-size:15.5px;font-weight:700;letter-spacing:.08em;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.btn1:active{transform:scale(.985)}
+.btn2{width:100%;height:42px;margin-top:8px;border:1px solid var(--hair);border-radius:14px;background:transparent;color:var(--ink);font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.sec{margin:18px 0 8px;font-size:12.5px;color:var(--mute);letter-spacing:.1em;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{border-radius:14px;background:var(--hair);padding:10px 4px;text-align:center}
+.stat b{display:block;font-size:19px;font-variant-numeric:tabular-nums}
+.stat small{font-size:11px;color:var(--mute)}
+.bar{height:8px;border-radius:4px;background:var(--hair);overflow:hidden;margin:6px 0 2px}
+.bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#E5484D,#F2994A,#F0C43D,#46B26A,#35B6D6,#4C63D2,#9A5BD3)}
+.row2{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 2px;border-bottom:1px solid var(--hair)}
+.row2:last-child{border-bottom:0}
+.row2 span:last-child{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600}
+ul.ach{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+ul.ach li{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--hair)}
+ul.ach li.lock{opacity:.5}
+ul.ach .ai{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--accent);color:var(--onaccent);flex:none}
+ul.ach li.lock .ai{background:transparent;border:1px dashed var(--mute);color:var(--mute)}
+ul.ach b{font-size:14px;display:block}
+ul.ach small{font-size:12px;color:var(--mute)}
+.res{text-align:center}
+.res img{height:84px;display:block;margin:0 auto 4px}
+.res h3{margin:4px 0 2px;font-size:22px;letter-spacing:.1em}
+.res .big{font-size:38px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent);letter-spacing:.04em}
+.res .tag{display:inline-flex;align-items:center;gap:5px;margin:6px 4px 0;padding:4px 10px;border-radius:12px;background:var(--hair);font-size:12.5px}
+#ach{position:fixed;z-index:30;left:50%;top:32%;white-space:nowrap;transform:translate(-50%,-14px) scale(.9);display:flex;align-items:center;gap:12px;padding:10px 18px 10px 12px;border-radius:22px;opacity:0;pointer-events:none;transition:opacity .3s,transform .5s cubic-bezier(.2,1.3,.3,1)}
+#ach.on{opacity:1;transform:translate(-50%,0) scale(1)}
+#ach .ai{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--accent);color:var(--onaccent)}
+#ach b{font-size:14.5px;display:block;letter-spacing:.06em}
+#ach small{font-size:12px;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){#dock,#win,#toast,#cen,#sheet,#sheetBg,#ach{transition:none}}
 @media (max-width:380px){#dock button{width:46px}.pill{padding:0 13px 0 11px}}
 </style>
 <canvas id="cv" aria-label="七塊索瑪方塊的 3D 擺放區"></canvas>
@@ -63,11 +113,16 @@ button,a{font:inherit;color:inherit;-webkit-appearance:none;appearance:none}
 <div id="top">
   <a class="pill glass" id="hubBtn" href="./index.html" aria-label="回錨界入口"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v16" /> <path d="m19 13 2-1a9 9 0 0 1-18 0l2 1" /> <path d="M9 11h6" /> <circle cx="12" cy="4" r="2" /></svg>入口</a>
   <div class="grp">
+    <button class="fab glass" id="bSheet" aria-label="挑戰與紀錄" title="挑戰與紀錄"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2" /> <path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2" /> <path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3" /> <path d="M4 22h16" /> <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" /> <path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3" /></svg></button>
     <button class="fab glass on" id="bGrav" aria-pressed="true" aria-label="重力" title="重力"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 15 4 4" /> <path d="M2.352 10.648a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l6.029-6.029a1 1 0 1 1 3 3l-6.029 6.029a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l6.365-6.367A1 1 0 0 0 8.716 4.282z" /> <path d="m5 8 4 4" /></svg></button>
     <button class="fab glass" id="snd" data-s="0" aria-label="音效" title="音效"><span id="sndOn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <path d="M16 9a5 5 0 0 1 0 6" /> <path d="M19.364 18.364a9 9 0 0 0 0-12.728" /></svg></span><span id="sndOff"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298z" /> <path d="m16.5 14.5 5-5" /> <path d="m16.5 9.5 5 5" /></svg></span></button>
     <button class="fab glass" id="bReset" aria-label="重新擺放" title="重新擺放"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /> <path d="M3 3v5h5" /> <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /> <path d="M16 16h5v5" /></svg><span id="rsT" hidden>再按一次</span></button>
   </div>
 </div>
+<div id="hud" class="glass" hidden><span id="hudLv"></span><span class="mono" id="hudT">00:00</span><button id="hudHint" aria-label="提示"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></svg><span id="hudHc"></span></button></div>
+<div id="sheetBg"></div>
+<div id="sheet" class="glass" role="dialog" aria-modal="true" aria-label="挑戰與紀錄" hidden></div>
+<div id="ach" class="glass" role="status" aria-live="polite"><span class="ai"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" /> <circle cx="12" cy="8" r="6" /></svg></span><div><b id="achN"></b><small id="achD"></small></div></div>
 <div id="toast" class="glass" role="status" aria-live="polite"></div>
 <div id="win" class="glass" role="status" aria-live="polite"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /> <path d="M20 2v4" /> <path d="M22 4h-4" /> <circle cx="4" cy="20" r="2" /></svg><span id="winT"></span></div>
 <div id="tip" class="glass">點一塊方塊開始　拖曳空白處轉視角</div>
@@ -99,13 +154,16 @@ var DEF = [
 ];
 var P = [], sel = -1, yaw = -0.62, pitch = 0.64, zoom = 1, gravity = true, dirty = true, held = false;
 var polys = [], rings = [], W = 0, H = 0, DPR = 1;
+var mode = 'free', chal = null, hintUntil = 0, hintTgt = null;
 var snd = false; try { snd = localStorage.getItem('soma:snd') === '1'; } catch (e) {}
 
 function blank(d) { return { k: d.k, c: d.c, cells: d.cells.map(function (a) { return a.slice(); }), ox: d.o[0], oy: d.o[1], oz: d.o[2], vo: [0, 0, 0], vv: [0, 0, 0], vl: 0, vlv: 0, rot: null }; }
 function layout() { P = DEF.map(blank); sel = -1; }
 function save() {
   try { check(); } catch (e) {}
-  try { localStorage.setItem('soma:free:v1', JSON.stringify(P.map(function (p) { return { cells: p.cells, ox: p.ox, oy: p.oy, oz: p.oz }; }))); } catch (e) {}
+  var lay = P.map(function (p) { return { cells: p.cells, ox: p.ox, oy: p.oy, oz: p.oz }; });
+  if (mode === 'chal' && chal) { chal.lay = lay; chalSave(); return; }
+  try { localStorage.setItem('soma:free:v1', JSON.stringify(lay)); } catch (e) {}
 }
 function load() {
   layout();
@@ -118,6 +176,10 @@ function load() {
       if (!allValid()) layout();
     }
   } catch (e) { layout(); }
+  try {
+    var cs = JSON.parse(localStorage.getItem('soma:ch:v1') || 'null');
+    if (cs && !cs.done && cs.lay && cs.lay.length === 7 && cs.tgt) { chal = cs; chal.t0 = Date.now(); setLay(cs.lay); if (allValid()) enterChal(); else { chal = null; setLay(null); } }
+  } catch (e) { chal = null; }
 }
 function key(x, y, z) { return x + ',' + y + ',' + z; }
 function occ(skip) {
@@ -274,6 +336,7 @@ function draw() {
   var g0 = proj(0, 0, 0), S = scale(), gl = ctx.createRadialGradient(g0[0], g0[1], 0, g0[0], g0[1], S * 12);
   gl.addColorStop(0, dk ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.85)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+  if (mode === 'chal') drawGuide(dk);
   // 接觸陰影（高度越高越淡越散）
   P.forEach(function (p, pi) {
     var h = Math.max(0, p.oy + p.vo[1] + p.vl), sp = .06 + h * .07, al = (pi === sel ? 1.15 : 1) * (dk ? .5 : .2) / (1 + h * .45);
@@ -292,6 +355,7 @@ function draw() {
     for (var a = 0; a <= 28; a++) { var q = proj(r.x + Math.cos(a / 28 * 6.2832) * rad, 0, r.z + Math.sin(a / 28 * 6.2832) * rad); a ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }
     ctx.stroke();
   });
+  if (hintTgt && now < hintUntil) drawGhost(dk, now);
   // 方塊
   var cubes = [];
   P.forEach(function (p, pi) {
@@ -333,7 +397,7 @@ function draw() {
     });
   });
   var has = sel >= 0; $('dock').classList.toggle('on', has);
-  $('tip').style.opacity = (has || tipGone) ? 0 : 1;
+  $('tip').style.opacity = (has || tipGone || mode === 'chal') ? 0 : 1;
 }
 var tipGone = false;
 function hideTip() { tipGone = true; $('tip').style.opacity = 0; }
@@ -360,6 +424,7 @@ var lastT = 0;
 function loop(t) {
   var dt = Math.min(.033, (t - lastT) / 1000 || .016); lastT = t;
   if (springs(dt / 2) | springs(dt / 2)) dirty = true;
+  if (hintTgt) { if (performance.now() < hintUntil) dirty = true; else { hintTgt = null; dirty = true; } }
   if (dirty) draw();
   requestAnimationFrame(loop);
 }
@@ -450,7 +515,7 @@ var rt = null;
 $('bReset').onclick = function () {
   var b = this;
   if (!rt) { b.classList.add('ask'); $('rsT').hidden = false; rt = setTimeout(rstBtn, 2500); return; }
-  rstBtn(); layout(); save(); dirty = true;
+  rstBtn(); if (mode === 'chal' && chal) { setLay(chal.init); } else layout(); sel = -1; save(); dirty = true;
 };
 function rstBtn() { clearTimeout(rt); rt = null; var b = $('bReset'); b.classList.remove('ask'); $('rsT').hidden = true; }
 window.addEventListener('keydown', function (e) {
@@ -468,6 +533,199 @@ window.addEventListener('keydown', function (e) {
 });
 window.addEventListener('resize', resize);
 if (window.matchMedia) { try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { dirty = true; }); } catch (e) {} }
+
+/* ---------- 挑戰模式、紀錄與成就 ---------- */
+var SOLS = ["001301211345355226345446266", "001301211354354226344556266", "001301211446335225466436255", "001301222341344625341655665", "001301222351344624351655664", "001301222441355326451456366", "001301222441365325461466355", "001301222541344326541556366", "001301222641345325661644355", "001301222651355324661645344", "001301311324344556222546566", "001301311326366554222546544", "001301311344354655222624665", "001301341321344645222655665", "001301351321345655222644664", "001301351341345655442622662", "001301361341365665244224255", "001301441355345641352622662", "001301442351342642351655662", "001304222341344625311655665", "001304222541344326511556366", "001305255441335226411436266", "001306266351354226311554244", "001324222601354344661651355", "001325222601355354661641344", "001331222501533426551446466", "001331222601433425661655445", "001331433601445455661625222", "001331551604533521664644222", "001334233601254244661651255", "001334244501233246511556266", "001335233601255254661641244", "001351255601334225661634244", "001351551601354344662622342", "001351552601352342661644342", "001401331441452633552652662", "001401331441455633222625665", "001401441655433331665625222", "001403222441453623551651663", "001406266441455226311335235", "001406366441455336211225235", "001423222601443543661651553", "001431442601433522661653552", "001433332601442542661651552", "001441241601253243663653255", "001441243601253243661653255", "001501331451552633442642662", "001501551433332651442642662", "001501551631433453662622442", "001503222451553623441641663", "001521222601544554661633334", "001523222601543553661641443", "001533332601542552661641442", "001551251601544224663633234", "001551544601334524661633222", "001551544601664524331633222", "002102132446552133466456153", "002102132556152334566146344", "002102132556452133566446143", "002103111522533644552634664", "002103111622453453662655443", "002103111622553543662644543", "002104144522533146552336166", "002104144522566146552336133", "002104144622335145662633155", "002104144622665145332633155", "002106166522544146552334133", "002106166552542146332533144", "002106366422155336442145135", "002111331502542633552644664", "002111551602542533662644334", "002122132405155336445146366", "002122152406445155466336133", "002133111402332556442546566", "002133111602332544662654554", "002136166402332156442345155", "002155135402152336442146366", "002301111322354655342644665", "002301111322355644352654664", "002301441352342641352655661", "002301441622345341662655351", "002302112644342315664655315", "002302362354362166554544111", "002302362354362661554544111", "002302362355362664115145144", "002304114622344315662655315", "002304144322355146352156166", "002304144322365145362166155", "002304344322355146152156166", "002304344322365145162166155", "002305115322364155362664144", "002305115622334155662634144", "002305155322365144362664114", "002305155622335144662634114", "002306166352342146352155144", "002306366322354556112154144", "002306366322355446112145145", "002306366352342146152155144", "002306566322354556342144111", "002306566342352556342441111", "002322112506344314566556314", "002344114602332154662635155", "002345445602332455662631111", "002351551602352341662644341", "002401111442452655332633665", "002402112446452155366336135", "002402332441452633551651661", "002402332446452133166156155", "002402442556452111566336133", "002405455622335441662633111", "002405455622665441332633111", "002406466522533446552331111", "002406566442452556132133113", "002406566442452556332133111", "002422442603433531661651551", "002422442605455111665633331", "002433331602442541662651551", "002441111602452455662633335", "002455445602452111662633331", "002501111622544554662633334", "002501531422551633442641663", "002501531622551334662641344", "002502132654552133664644113", "002502332451552633441641661", "002502332654552133664644111", "002502552433332651441641661", "002502552446342351366346111", "002502552634332351664644111", "002502552664362351364344111", "002503551622433451662631441", "002533331602542551662641441", "002544554602332154662633111", "002544554602662154332633111", "002554544602332541662633111", "002554544602662541332633111", "002602132654662133554544113", "002602332654662133554544111", "002604144622665145332133155", "003103111455663623445645222", "003103111556453443566426222", "003103111655443423665645222", "003106166433442156432552152", "003106166533442146532552142", "003106166553543146222523144", "003133132406442152466556152", "003133132506442142566556142", "003153111604553523664644222", "003401111443453655222623665", "003403111655443143665625222", "003403222441453623551651661", "003403222446453123166156155", "003406166533442146532552112", "003406266443453226111153255", "003406466523553446222153111", "003406466533552446132152112", "003406566443453556111123222", "003406566443453556222123111", "003423222601443543661651551", "003503111654553123664644222", "003503222451553623441641661", "003503222654553123664644111", "003523222601543553661641441", "003544554603663154222623111", "003554544603663541222623111", "003601111623663554222543544", "003603111654663123554544222", "003603222654663123554544111", "004104111644332533662652552", "004104152644552152663633132", "004111331504544633552622662", "004111551604544533662622332", "004304111644355351662622352", "004304112344365122355665162", "004304112644352312665655312", "004304115644355315662622312", "004304211344365221355665261", "004304222344355621351651661", "004304222344355625311651661", "004304222644355325661651311", "004304311344365661255225261", "004304361344365661255225211", "004344112306342152366556152", "004344112506342312566556312", "004355351304344651222621661", "004501111334544556233226266", "004504552144332652111633662", "004504552144662652111633332", "004504553144663653111623222", "004504553644663153222623111", "004544552106142152366336132", "004551251604544221663633231", "004556266504544226111331233", "004556266504544226311331231", "004556366504544336112122132", "004556366504544336211221231", "004604111644665331255225233", "004604112644665122355335132", "004604211644665221355335231", "004604311644665331255225231", "004604661344335631255225211", "004604661344355651222321351", "004604662144552652111533332", "004604663144553653111523222", "004604663544552633112152132", "004604663544553623111153222", "004644661301341651222325355", "004644662301345622111355352", "102102132106552334566546344", "102104144302352146552356366", "102105115402442655432633663", "102106166402442156432335355", "104106166304344156222325355", "104106266104244256133335255", "111103222446003523466456553", "111103222455003623445645663", "111103222503503426553446466", "111103222504503623554644663", "111103222506403423566556443", "111103222603403425663655445", "111106366455300326445345222", "111123222403003556443546566", "111123222403443556403506566", "111123222446003503466456553", "111123222446553503466406503", "111123222455003603445645663", "111123222503503644553604664", "111123222603003544663654554", "111123222655043003665645443", "111123222655403403665605443", "111133332446002502466456552", "111133332446552502466406502", "111133332455002602445645662", "111133332504500622554644662", "111133332506400422566556442", "111133332544540622554600662", "111133332655042002665645442", "111133332655400422665605442", "111133332655402402665605442", "111133335446055005466426222", "111143244655243203665605203"];
+var ICONS = {"trophy": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2\" /> <path d=\"M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2\" /> <path d=\"M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3\" /> <path d=\"M4 22h16\" /> <path d=\"M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\" /> <path d=\"M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3\" /></svg>", "medal": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15\" /> <path d=\"M11 12 5.12 2.2\" /> <path d=\"m13 12 5.88-9.8\" /> <path d=\"M8 7h8\" /> <circle cx=\"12\" cy=\"17\" r=\"5\" /> <path d=\"M12 18v-2h-.5\" /></svg>", "zap": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" /></svg>", "lightbulb": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" /></svg>", "lightbulb-off": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M16.8 11.2c.8-.9 1.2-2 1.2-3.2a6 6 0 0 0-9.3-5\" /> <path d=\"m2 2 20 20\" /> <path d=\"M6.3 6.3a4.67 4.67 0 0 0 1.2 5.2c.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" /></svg>", "calendar-check": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 2v3\" /> <path d=\"M16 2v3\" /> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"m9 15 2 2 4-4\" /></svg>", "layout-grid": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" /></svg>", "flame": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4\" /></svg>", "x": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" /></svg>", "library": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m16 6 4 14\" /> <path d=\"M12 6v14\" /> <path d=\"M8 8v12\" /> <path d=\"M4 4v16\" /></svg>", "shapes": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z\" /> <rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\" /> <circle cx=\"17.5\" cy=\"17.5\" r=\"3.5\" /></svg>", "play": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\" /></svg>", "award": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526\" /> <circle cx=\"12\" cy=\"8\" r=\"6\" /></svg>", "timer": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\" /> <line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\" /> <circle cx=\"12\" cy=\"14\" r=\"8\" /></svg>", "lock": "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\" /> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\" /></svg>"};
+var LV = { easy: { n: '入門', pre: 5 }, normal: { n: '普通', pre: 4 }, hard: { n: '困難', pre: 2 }, extreme: { n: '極限', pre: 0 } };
+var LVK = ['easy', 'normal', 'hard', 'extreme'], selLv = 'normal';
+var SLOTS = [[-7, -6], [-3, -6], [1, -6], [5, -6], [-6, 4], [-2, 4], [2, 4]];
+function ico(n) { return ICONS[n] || ''; }
+var REC = (function () {
+  var d = { n: 0, best: {}, seen: [], days: [], figs: [], ach: {}, fast: false, noHint: false, last: -1 };
+  try { var r = JSON.parse(localStorage.getItem('soma:rec:v1') || 'null'); if (r) for (var k in d) if (r[k] !== undefined) d[k] = r[k]; } catch (e) {}
+  return d;
+})();
+function recSave() { try { localStorage.setItem('soma:rec:v1', JSON.stringify(REC)); } catch (e) {} }
+function chalSave() { if (!chal) return; try { chal.acc = elapsedMs(true); chal.t0 = Date.now(); localStorage.setItem('soma:ch:v1', JSON.stringify(chal)); } catch (e) {} }
+function elapsedMs(fold) { if (!chal) return 0; return (chal.acc || 0) + (document.hidden ? 0 : Date.now() - chal.t0); }
+function fmt(ms) { var t = Math.round(ms / 1000), m = Math.floor(t / 60), s = t % 60; return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; }
+function dayStr(d) { d = d || new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function streak(r) {
+  var set = {}; r.days.forEach(function (x) { set[x] = 1; });
+  var d = new Date(), n = 0;
+  if (!set[dayStr(d)]) d.setDate(d.getDate() - 1);
+  while (set[dayStr(d)]) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+var ACH = [
+  { id: 'first', n: '首次落成', d: '完成第一次方塊挑戰', i: 'trophy', t: function (r) { return r.n >= 1; } },
+  { id: 'ten', n: '熟手', d: '累計完成 10 次挑戰', i: 'medal', t: function (r) { return r.n >= 10; } },
+  { id: 'all', n: '全才', d: '四種難度都完成過', i: 'layout-grid', t: function (r) { return LVK.every(function (k) { return r.best[k]; }); } },
+  { id: 'ext', n: '白手起家', d: '完成一次「極限」：七塊全從散落開始', i: 'flame', t: function (r) { return !!r.best.extreme; } },
+  { id: 'fast', n: '閃電手', d: '困難以上，60 秒內完成', i: 'zap', t: function (r) { return r.fast; } },
+  { id: 'nohint', n: '不靠提示', d: '困難以上，沒用過提示就完成', i: 'lightbulb-off', t: function (r) { return r.noHint; } },
+  { id: 'col', n: '收藏家', d: '解過 20 種不同的拼法', i: 'library', t: function (r) { return r.seen.length >= 20; } },
+  { id: 'streak', n: '三日不輟', d: '連續 3 天完成挑戰', i: 'calendar-check', t: function (r) { return streak(r) >= 3; } },
+  { id: 'shapes', n: '圖形師', d: '在自由拼拼出全部 8 種圖形', i: 'shapes', t: function (r) { return r.figs.length >= 8; } }
+];
+function grant(silent) {
+  var fresh = [];
+  ACH.forEach(function (a) { if (!REC.ach[a.id] && a.t(REC)) { REC.ach[a.id] = Date.now(); fresh.push(a); } });
+  if (fresh.length) { recSave(); if (!silent) fresh.forEach(function (a, i) { setTimeout(function () { showAch(a); }, 900 + i * 2600); }); }
+  return fresh;
+}
+function showAch(a) {
+  $('achN').textContent = '成就解鎖　' + a.n; $('achD').textContent = a.d; $('ach').querySelector('.ai').innerHTML = ico(a.i);
+  $('ach').classList.add('on'); buzz([8, 30, 12]); chime();
+  clearTimeout(showAch.t); showAch.t = setTimeout(function () { $('ach').classList.remove('on'); }, 2400);
+}
+function noteFig(n) { if (REC.figs.indexOf(n) < 0) { REC.figs.push(n); recSave(); grant(); } }
+
+var PROPER = MATS_PROPER();
+function MATS_PROPER() {
+  var out = [], perms = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]], par = [0, 1, 1, 0, 0, 1];
+  perms.forEach(function (pm, pi) { [1, -1].forEach(function (a) { [1, -1].forEach(function (b) { [1, -1].forEach(function (c) { if ((par[pi] ? -1 : 1) * a * b * c === 1) out.push({ p: pm, s: [a, b, c] }); }); }); }); });
+  return out;
+}
+function setLay(lay) {
+  if (!lay) { layout(); return; }
+  layout(); lay.forEach(function (q, i) { P[i].cells = q.cells.map(function (c) { return c.slice(); }); P[i].ox = q.ox; P[i].oy = q.oy; P[i].oz = q.oz; });
+}
+function normCells(cs) {
+  var mn = [1e9, 1e9, 1e9]; cs.forEach(function (c) { for (var k = 0; k < 3; k++) if (c[k] < mn[k]) mn[k] = c[k]; });
+  return { cells: cs.map(function (c) { return [c[0] - mn[0], c[1] - mn[1], c[2] - mn[2]]; }), o: mn };
+}
+function enterChal() {
+  mode = 'chal'; sel = -1; lastFig = null; hintTgt = null; zoom = Math.min(zoom, .86); document.body.classList.add('chal');
+  $('hud').hidden = false; $('hudLv').textContent = LV[chal.lvl].n + '　#' + (chal.id + 1); hudUpdate(); dirty = true;
+}
+function leaveChal() {
+  mode = 'free'; chal = null; lastFig = null; hintTgt = null; zoom = 1; document.body.classList.remove('chal'); $('hud').hidden = true;
+  try { var a = JSON.parse(localStorage.getItem('soma:free:v1') || 'null'); setLay(a && a.length === 7 ? a : null); if (!allValid()) layout(); } catch (e) { layout(); }
+  sel = -1; dirty = true;
+}
+function startChal(lv) {
+  var id; do { id = (Math.random() * SOLS.length) | 0; } while (id === REC.last && SOLS.length > 1);
+  var sol = SOLS[id], R = PROPER[(Math.random() * PROPER.length) | 0], tc = [[], [], [], [], [], [], []];
+  for (var i = 0; i < 27; i++) {
+    var x = ((i / 9) | 0) - 1, y = (((i / 3) | 0) % 3) - 1, z = (i % 3) - 1, v = [x, y, z];
+    var r = [R.s[0] * v[R.p[0]], R.s[1] * v[R.p[1]], R.s[2] * v[R.p[2]]];
+    tc[+sol[i]].push([r[0], r[1] + 1, r[2]]);
+  }
+  var idx = [0, 1, 2, 3, 4, 5, 6].sort(function () { return Math.random() - .5; }), pre = {}, n = LV[lv].pre;
+  for (var k = 0; k < n; k++) pre[idx[k]] = 1;
+  var slot = 0, lay = [];
+  for (var pi = 0; pi < 7; pi++) {
+    if (pre[pi]) { var nc = normCells(tc[pi]); lay.push({ cells: nc.cells, ox: nc.o[0], oy: nc.o[1], oz: nc.o[2] }); }
+    else {
+      var cells = DEF[pi].cells.map(function (c) { return c.slice(); }), rn = (Math.random() * 4) | 0, ax = ['x', 'y', 'z'];
+      for (var q = 0; q < rn; q++) cells = rotCells(cells, ax[(Math.random() * 3) | 0]);
+      var sl = SLOTS[slot++]; lay.push({ cells: cells, ox: sl[0], oy: 0, oz: sl[1] });
+    }
+  }
+  chal = { id: id, lvl: lv, tgt: tc, init: lay.map(function (q) { return { cells: q.cells, ox: q.ox, oy: q.oy, oz: q.oz }; }), lay: lay, t0: Date.now(), acc: 0, hints: 0, done: false };
+  setLay(lay); REC.last = id; recSave(); enterChal(); chalSave(); closeSheet();
+  toast('第 ' + (id + 1) + ' 號拼法：把剩下的方塊拼成立方體');
+}
+function hudUpdate() { if (!chal) return; $('hudT').textContent = fmt(elapsedMs()); $('hudHc').textContent = chal.hints ? chal.hints : ''; }
+setInterval(function () { if (mode === 'chal' && chal && !chal.done && !document.hidden) hudUpdate(); }, 500);
+document.addEventListener('visibilitychange', function () { if (mode !== 'chal' || !chal) return; if (document.hidden) { chal.acc = (chal.acc || 0) + (Date.now() - chal.t0); } else chal.t0 = Date.now(); });
+$('hudHint').onclick = function () {
+  if (!chal || chal.done) return;
+  var miss = [];
+  for (var i = 0; i < 7; i++) {
+    var cur = P[i].cells.map(function (c) { return key(P[i].ox + c[0], P[i].oy + c[1], P[i].oz + c[2]); }).sort().join('|');
+    var tg = chal.tgt[i].map(function (c) { return key(c[0], c[1], c[2]); }).sort().join('|');
+    if (cur !== tg) miss.push(i);
+  }
+  if (!miss.length) { toast('每一塊都在標準位置上了'); return; }
+  var i = miss[(Math.random() * miss.length) | 0];
+  hintTgt = { cells: chal.tgt[i], c: P[i].c }; hintUntil = performance.now() + 4500; chal.hints++; hudUpdate(); chalSave(); dirty = true;
+  toast('提示：看發光的位置，它屬於這個顏色的方塊'); tick();
+};
+function completeChal() {
+  chal.done = true; var ms = elapsedMs(), lv = chal.lvl, hard = LV[lv].pre <= 2, first = !REC.best[lv] || ms < REC.best[lv], newSeen = REC.seen.indexOf(chal.id) < 0;
+  REC.n++; if (first) REC.best[lv] = ms; if (newSeen) REC.seen.push(chal.id);
+  var td = dayStr(); if (REC.days.indexOf(td) < 0) { REC.days.push(td); REC.days.sort(); REC.days = REC.days.slice(-90); }
+  if (hard && ms < 60000) REC.fast = true; if (hard && chal.hints === 0) REC.noHint = true;
+  recSave(); chalSave();
+  var f = FIGKEY[canonKey((function () { var a = []; P.forEach(function (p) { p.cells.forEach(function (c) { a.push([p.ox + c[0], p.oy + c[1], p.oz + c[2]]); }); }); return a; })())]; if (f) celebrate(f);
+  var fresh = grant(true);
+  var info = { ms: ms, lv: lv, id: chal.id, hints: chal.hints, best: first, newSeen: newSeen, fresh: fresh };
+  setTimeout(function () { openSheet('result', info); }, 1700);
+}
+function drawGuide(dk) {
+  var c = dk ? '156,192,238' : '31,58,95', X0 = -1, X1 = 2, Z0 = -1, Z1 = 2;
+  function path(y) { var a = proj(X0, y, Z0), b = proj(X1, y, Z0), d = proj(X1, y, Z1), e = proj(X0, y, Z1); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(d[0], d[1]); ctx.lineTo(e[0], e[1]); ctx.closePath(); }
+  ctx.save(); ctx.lineWidth = 1.4; ctx.setLineDash([5, 5]);
+  path(0); ctx.fillStyle = 'rgba(' + c + ',.05)'; ctx.fill(); ctx.strokeStyle = 'rgba(' + c + ',.32)'; ctx.stroke();
+  path(3); ctx.strokeStyle = 'rgba(' + c + ',.14)'; ctx.stroke(); ctx.setLineDash([]);
+  [[X0, Z0], [X1, Z0], [X1, Z1], [X0, Z1]].forEach(function (q) { var a = proj(q[0], 0, q[1]), b = proj(q[0], 3, q[1]); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.strokeStyle = 'rgba(' + c + ',.13)'; ctx.stroke(); });
+  ctx.restore();
+}
+function drawGhost(dk, now) {
+  var col = rgb(hintTgt.c), a = .26 + .14 * Math.sin(now / 160), cs = Math.cos(yaw), sn = Math.sin(yaw), sp = Math.sin(pitch), cp = Math.cos(pitch);
+  var list = hintTgt.cells.map(function (c) { return { c: c, d: proj(c[0] + .5, c[1] + .5, c[2] + .5)[2] }; }).sort(function (u, v) { return u.d - v.d; });
+  list.forEach(function (o) {
+    FACES.forEach(function (f) {
+      if (f.n[1] === -1) return;
+      var nz1 = -f.n[0] * sn + f.n[2] * cs; if (f.n[1] * sp + nz1 * cp <= 0.001) return;
+      var pts = f.v.map(function (v) { return proj(o.c[0] + v[0], o.c[1] + v[1], o.c[2] + v[2]); });
+      ctx.beginPath(); quadPath(pts); ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + a.toFixed(3) + ')'; ctx.fill();
+      ctx.strokeStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.95)'; ctx.lineWidth = 1.6; ctx.stroke();
+    });
+  });
+}
+
+/* ---------- 面板 ---------- */
+var sheetOpen = false, lastFocus = null;
+function openSheet(view, info) {
+  var sh = $('sheet'); sh.innerHTML = view === 'result' ? resultHTML(info) : mainHTML();
+  lastFocus = document.activeElement; sh.hidden = false; void sh.offsetWidth; sh.classList.add('on'); $('sheetBg').classList.add('on'); sheetOpen = true;
+  var x = sh.querySelector('[data-act="close"]'); if (x) x.focus();
+}
+function closeSheet() {
+  if (!sheetOpen) return; var sh = $('sheet'); sh.classList.remove('on'); $('sheetBg').classList.remove('on'); sheetOpen = false;
+  setTimeout(function () { if (!sheetOpen) sh.hidden = true; }, 420); try { lastFocus && lastFocus.focus(); } catch (e) {}
+}
+function head(t) { return '<div class="sh-h"><b>' + t + '</b><button class="sh-x" data-act="close" aria-label="關閉">' + ico('x') + '</button></div>'; }
+function mainHTML() {
+  var h = head('方塊挑戰');
+  h += '<p class="sh-d">從 240 種拼法中隨機抽一題，先替你拼好幾塊，你把剩下的接著拼成立方體。</p>';
+  if (mode === 'chal' && chal) h += '<p class="sh-d" style="margin-top:-6px;color:var(--accent);font-weight:600">目前進行中：' + LV[chal.lvl].n + '　#' + (chal.id + 1) + '</p>';
+  h += '<div class="chips">' + LVK.map(function (k) { return '<button class="chip' + (k === selLv ? ' on' : '') + '" data-lv="' + k + '">' + LV[k].n + '<small>' + (LV[k].pre ? '預擺 ' + LV[k].pre + ' 塊' : '全部散落') + '</small></button>'; }).join('') + '</div>';
+  h += '<button class="btn1" data-act="start">' + ico('play') + (mode === 'chal' ? '換一題' : '開始挑戰') + '</button>';
+  if (mode === 'chal') h += '<button class="btn2" data-act="free">' + ico('shapes') + '回到自由拼</button>';
+  var cnt = REC.seen.length;
+  h += '<div class="sec">戰績</div><div class="stats"><div class="stat"><b>' + REC.n + '</b><small>完成次數</small></div><div class="stat"><b>' + streak(REC) + '</b><small>連續天數</small></div><div class="stat"><b>' + cnt + '</b><small>收藏拼法</small></div><div class="stat"><b>' + REC.figs.length + '/8</b><small>自由圖形</small></div></div>';
+  h += '<div class="bar" aria-label="收藏進度"><i style="width:' + (cnt / 240 * 100).toFixed(1) + '%"></i></div><small style="color:var(--mute);font-size:11.5px">收藏 ' + cnt + ' / 240 種不同拼法</small>';
+  h += '<div class="sec">最佳時間</div>' + LVK.map(function (k) { return '<div class="row2"><span>' + LV[k].n + '</span><span>' + (REC.best[k] ? fmt(REC.best[k]) : '—') + '</span></div>'; }).join('');
+  var got = ACH.filter(function (a) { return REC.ach[a.id]; }).length;
+  h += '<div class="sec">成就　' + got + ' / ' + ACH.length + '</div><ul class="ach">' + ACH.map(function (a) { var ok = !!REC.ach[a.id]; return '<li class="' + (ok ? '' : 'lock') + '"><span class="ai">' + ico(ok ? a.i : 'lock') + '</span><div><b>' + a.n + '</b><small>' + a.d + '</small></div></li>'; }).join('') + '</ul>';
+  h += '<p class="sh-d" style="margin:14px 0 0;font-size:11.5px">紀錄只存在這個瀏覽器裡，換裝置或清除瀏覽資料就會歸零。</p>';
+  return h;
+}
+function resultHTML(o) {
+  var h = head('完成');
+  h += '<div class="res"><img alt="" src="' + F09 + '"><h3>' + LV[o.lv].n + '　#' + (o.id + 1) + '</h3><div class="big">' + fmt(o.ms) + '</div>';
+  if (o.best) h += '<span class="tag">' + ico('timer') + '這個難度的新紀錄</span>';
+  if (o.newSeen) h += '<span class="tag">' + ico('library') + '新收藏　' + REC.seen.length + ' / 240</span>';
+  h += '<span class="tag">' + ico('lightbulb') + '提示 ' + o.hints + ' 次</span>';
+  o.fresh.forEach(function (a) { h += '<span class="tag">' + ico(a.i) + a.n + '</span>'; });
+  h += '</div><div style="height:14px"></div><button class="btn1" data-act="start">' + ico('play') + '再來一題</button><button class="btn2" data-act="main">' + ico('trophy') + '查看紀錄與成就</button><button class="btn2" data-act="free">' + ico('shapes') + '回到自由拼</button>';
+  return h;
+}
+$('sheet').addEventListener('click', function (e) {
+  var t = e.target.closest('[data-act],[data-lv]'); if (!t) return;
+  if (t.dataset.lv) { selLv = t.dataset.lv; openSheet('main'); return; }
+  var a = t.dataset.act;
+  if (a === 'close') closeSheet(); else if (a === 'start') startChal(selLv);
+  else if (a === 'free') { leaveChal(); closeSheet(); toast('回到自由拼'); } else if (a === 'main') openSheet('main');
+});
+$('sheetBg').addEventListener('click', closeSheet);
+$('bSheet').onclick = function () { openSheet('main'); };
+window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sheetOpen) closeSheet(); });
 
 /* ---------- 有意義的圖形：辨識與慶祝 ---------- */
 var FIGS = [{"n": "立方體", "l": "三乘三乘三。最古典的答案。", "c": [[0, 0, 0], [1, 0, 0], [2, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1], [0, 0, 2], [1, 0, 2], [2, 0, 2], [0, 1, 0], [1, 1, 0], [2, 1, 0], [0, 1, 1], [1, 1, 1], [2, 1, 1], [0, 1, 2], [1, 1, 2], [2, 1, 2], [0, 2, 0], [1, 2, 0], [2, 2, 0], [0, 2, 1], [1, 2, 1], [2, 2, 1], [0, 2, 2], [1, 2, 2], [2, 2, 2]]}, {"n": "階梯", "l": "往上走的路，一階一階量過。", "c": [[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0], [2, 0, 0], [2, 1, 0], [0, 0, 1], [0, 1, 1], [0, 2, 1], [1, 0, 1], [1, 1, 1], [1, 2, 1], [2, 0, 1], [2, 1, 1], [2, 2, 1], [0, 0, 2], [0, 1, 2], [0, 2, 2], [0, 3, 2], [1, 0, 2], [1, 1, 2], [1, 2, 2], [1, 3, 2], [2, 0, 2], [2, 1, 2], [2, 2, 2], [2, 3, 2]]}, {"n": "山脊", "l": "山脊線。這條量得很準。", "c": [[0, 0, 0], [1, 0, 0], [2, 0, 0], [0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1], [2, 0, 1], [2, 1, 1], [0, 0, 2], [0, 1, 2], [0, 2, 2], [1, 0, 2], [1, 1, 2], [1, 2, 2], [2, 0, 2], [2, 1, 2], [2, 2, 2], [0, 0, 3], [0, 1, 3], [1, 0, 3], [1, 1, 3], [2, 0, 3], [2, 1, 3], [0, 0, 4], [1, 0, 4], [2, 0, 4]]}, {"n": "金字塔", "l": "小小的金字塔。座標歸零，漂亮。", "c": [[0, 0, 0], [1, 0, 0], [1, 1, 0], [2, 0, 0], [2, 1, 0], [3, 0, 0], [3, 1, 0], [4, 0, 0], [0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1], [2, 0, 1], [2, 1, 1], [2, 2, 1], [3, 0, 1], [3, 1, 1], [4, 0, 1], [4, 1, 1], [0, 0, 2], [1, 0, 2], [1, 1, 2], [2, 0, 2], [2, 1, 2], [3, 0, 2], [3, 1, 2], [4, 0, 2]]}, {"n": "浴缸", "l": "……浴缸？好吧，這也算一種測量單位。", "c": [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [4, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1], [3, 0, 1], [4, 0, 1], [0, 0, 2], [1, 0, 2], [2, 0, 2], [3, 0, 2], [4, 0, 2], [0, 1, 0], [1, 1, 0], [2, 1, 0], [3, 1, 0], [4, 1, 0], [0, 1, 1], [4, 1, 1], [0, 1, 2], [1, 1, 2], [2, 1, 2], [3, 1, 2], [4, 1, 2]]}, {"n": "沙發", "l": "沙發。我可以坐一下嗎？", "c": [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [4, 0, 0], [0, 0, 1], [1, 0, 1], [2, 0, 1], [3, 0, 1], [4, 0, 1], [0, 0, 2], [1, 0, 2], [2, 0, 2], [3, 0, 2], [4, 0, 2], [0, 1, 0], [4, 1, 0], [0, 1, 1], [4, 1, 1], [0, 1, 2], [1, 1, 2], [2, 1, 2], [3, 1, 2], [4, 1, 2], [1, 2, 2], [2, 2, 2], [3, 2, 2]]}, {"n": "橋", "l": "橋。兩端都落地了，很穩。", "c": [[0, 0, 0], [6, 0, 0], [0, 0, 1], [6, 0, 1], [0, 0, 2], [6, 0, 2], [0, 1, 0], [1, 1, 0], [2, 1, 0], [3, 1, 0], [4, 1, 0], [5, 1, 0], [6, 1, 0], [0, 1, 1], [1, 1, 1], [2, 1, 1], [3, 1, 1], [4, 1, 1], [5, 1, 1], [6, 1, 1], [0, 1, 2], [1, 1, 2], [2, 1, 2], [3, 1, 2], [4, 1, 2], [5, 1, 2], [6, 1, 2]]}, {"n": "長凳", "l": "長凳。校準員也需要休息。", "c": [[0, 0, 0], [6, 0, 0], [0, 0, 1], [6, 0, 1], [0, 1, 0], [1, 1, 0], [2, 1, 0], [3, 1, 0], [4, 1, 0], [5, 1, 0], [6, 1, 0], [0, 1, 1], [1, 1, 1], [2, 1, 1], [3, 1, 1], [4, 1, 1], [5, 1, 1], [6, 1, 1], [0, 2, 0], [6, 2, 0], [0, 2, 1], [1, 2, 1], [2, 2, 1], [3, 2, 1], [4, 2, 1], [5, 2, 1], [6, 2, 1]]}];
@@ -492,7 +750,8 @@ var lastFig = null;
 function check() {
   var all = []; P.forEach(function (p) { p.cells.forEach(function (c) { all.push([p.ox + c[0], p.oy + c[1], p.oz + c[2]]); }); });
   var f = FIGKEY[canonKey(all)] || null;
-  if (f && f !== lastFig) celebrate(f);
+  if (mode === 'chal') { if (f && f.n === '立方體' && chal && !chal.done) { lastFig = f; completeChal(); } return; }
+  if (f && f !== lastFig) { celebrate(f); noteFig(f.n); }
   lastFig = f;
 }
 var fw = $('fw'), fx = fw.getContext('2d'), parts = [], fwOn = false, fwTimers = [], shock = [];
@@ -539,6 +798,6 @@ function celebrate(f) {
 
 load(); setSnd(); resize(); requestAnimationFrame(loop);
 setTimeout(function () { var c = $('cen'); $('cenImg').src = F11; c.classList.add('on'); setTimeout(function () { c.classList.remove('on'); }, 4800); }, 800);
-window.__soma = { set: function (arr) { arr.forEach(function (q, i) { P[i].cells = q.cells; P[i].ox = q.ox; P[i].oy = q.oy; P[i].oz = q.oz; }); dirty = true; save(); }, P: function () { return P; }, sel: function (i) { sel = i; dirty = true; }, rotate: rotate, step: step, drop: drop, lift: lift, valid: allValid, proj: proj, draw: draw };
+window.__soma = { startChal: startChal, chal: function () { return chal; }, REC: REC, DEF: DEF, PROPER: PROPER, SOLS: SOLS, openSheet: openSheet, set: function (arr) { arr.forEach(function (q, i) { P[i].cells = q.cells; P[i].ox = q.ox; P[i].oy = q.oy; P[i].oz = q.oz; }); dirty = true; save(); }, P: function () { return P; }, sel: function (i) { sel = i; dirty = true; }, rotate: rotate, step: step, drop: drop, lift: lift, valid: allValid, proj: proj, draw: draw };
 })();
 </script>
