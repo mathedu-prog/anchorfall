@@ -396,16 +396,18 @@ var BGMEngine=(function(){
   function Player(ctx,out,season){
     var S=SONGS[season]||SONGS.autumn,self=this;
     var eighth=60/S.bpm*(S.eighth||0.5),per=S.per,total=per*16;
-    // 殘響
-    var len=Math.floor(ctx.sampleRate*2.6),buf=ctx.createBuffer(2,len,ctx.sampleRate);
-    for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+    // 殘響（較短、較省 CPU）
+    var len=Math.floor(ctx.sampleRate*1.7),buf=ctx.createBuffer(2,len,ctx.sampleRate);
+    for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.4)}
     var conv=ctx.createConvolver();conv.buffer=buf;
-    var bus=ctx.createGain(),wet=ctx.createGain();wet.gain.value=.34;
+    var bus=ctx.createGain(),wet=ctx.createGain();wet.gain.value=.3;
     bus.connect(out);bus.connect(conv);conv.connect(wet);wet.connect(out);
-    var nodes=[bus,wet,conv];
     var amb=null;
+    // 環境音：8 秒雜訊、首尾交叉淡化，避免循環接縫的「啪」聲
     if(S.amb){
-      var nb=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate),nd=nb.getChannelData(0);for(var k=0;k<nd.length;k++)nd[k]=Math.random()*2-1;
+      var sr=ctx.sampleRate,L=sr*8,X=Math.floor(sr*1.2),nb=ctx.createBuffer(1,L,sr),nd=nb.getChannelData(0),raw=new Float32Array(L+X);
+      for(var k=0;k<raw.length;k++)raw[k]=Math.random()*2-1;
+      for(k=0;k<L;k++){var v=raw[k];if(k<X){var w=k/X;v=raw[k]*w+raw[L+k]*(1-w)}nd[k]=v}
       var src=ctx.createBufferSource();src.buffer=nb;src.loop=true;
       var bp=ctx.createBiquadFilter();bp.type=S.amb==="waves"?"lowpass":"bandpass";bp.frequency.value=S.amb==="waves"?520:380;bp.Q.value=S.amb==="waves"?.4:.7;
       var ag=ctx.createGain();ag.gain.value=S.amb==="waves"?.012:.007;
@@ -413,25 +415,28 @@ var BGMEngine=(function(){
       src.connect(bp);bp.connect(ag);ag.connect(out);src.start();lfo.start();amb={src:src,lfo:lfo,nodes:[bp,ag,lg]};
     }
     function jit(){return Math.random()*.01-.003}
+    // 單一振盪器 + 自訂波形，取代原本每音 4 個振盪器
+    var WP=ctx.createPeriodicWave(new Float32Array([0,0,0,0,0]),new Float32Array([0,1,.3,.1,.04]));
+    var WB=ctx.createPeriodicWave(new Float32Array([0,0,0]),new Float32Array([0,1,.18]));
+    var WS=ctx.createPeriodicWave(new Float32Array([0,0,0,0,0,0]),new Float32Array([0,1,.5,.33,.2,.12]));
+    function env(g,t,vel,dec){
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vel,t+.008);
+      g.gain.exponentialRampToValueAtTime(.001,t+dec);g.gain.linearRampToValueAtTime(0,t+dec+.06);
+    }
     function piano(f,t,dur,vel){
-      var lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=1800+vel*5200;lp.Q.value=.3;
-      var g=ctx.createGain(),dec=Math.max(.8,2.5*Math.pow(440/f,.35)+dur*.25);
-      g.gain.setValueAtTime(.00001,t);g.gain.linearRampToValueAtTime(vel,t+.007);g.gain.exponentialRampToValueAtTime(.0006,t+dec);
-      lp.connect(g);g.connect(bus);
-      [[1,1,"sine"],[2,.34,"sine"],[3,.14,"sine"],[4,.06,"sine"]].forEach(function(p){
-        var o=ctx.createOscillator(),pg=ctx.createGain();o.type=p[2];o.frequency.value=f*p[0];o.detune.value=(Math.random()-.5)*5;pg.gain.value=p[1];o.connect(pg);pg.connect(lp);o.start(t);o.stop(t+dec+.05);});
+      var g=ctx.createGain(),dec=Math.min(2.2,Math.max(.8,2.2*Math.pow(440/f,.3))),o=ctx.createOscillator();
+      o.setPeriodicWave(WP);o.frequency.value=f;env(g,t,vel*1.5,dec);o.connect(g);g.connect(bus);o.start(t);o.stop(t+dec+.1);
     }
     function bell(f,t,dur,vel){
-      var g=ctx.createGain(),dec=2.2+dur*.2;
-      g.gain.setValueAtTime(.00001,t);g.gain.linearRampToValueAtTime(vel,t+.004);g.gain.exponentialRampToValueAtTime(.0005,t+dec);g.connect(bus);
-      [[1,1],[2.76,.16],[5.4,.06]].forEach(function(p){var o=ctx.createOscillator(),pg=ctx.createGain();o.type="sine";o.frequency.value=f*p[0];pg.gain.value=p[1];o.connect(pg);pg.connect(g);o.start(t);o.stop(t+dec+.05)});
+      var g=ctx.createGain(),dec=2;env(g,t,vel,dec);g.connect(bus);
+      [[1,1,WB],[2.76,.12,0]].forEach(function(p){var o=ctx.createOscillator(),pg=ctx.createGain();if(p[2])o.setPeriodicWave(p[2]);o.frequency.value=f*p[0];pg.gain.value=p[1];o.connect(pg);pg.connect(g);o.start(t);o.stop(t+dec+.1)});
     }
     function pad(freqs,t,dur){
-      var lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=760;lp.Q.value=.2;
+      var lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=700;lp.Q.value=.2;
       var g=ctx.createGain(),rel=1.0,end=t+dur+rel;
-      g.gain.setValueAtTime(.00001,t);g.gain.linearRampToValueAtTime(.011,t+.9);g.gain.setValueAtTime(.011,t+dur);g.gain.exponentialRampToValueAtTime(.0003,end);
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.014,t+.9);g.gain.setValueAtTime(.014,t+dur);g.gain.linearRampToValueAtTime(0,end);
       lp.connect(g);g.connect(bus);
-      freqs.forEach(function(f){[-7,7].forEach(function(dt){var o=ctx.createOscillator();o.type="sawtooth";o.frequency.value=f;o.detune.value=dt;o.connect(lp);o.start(t);o.stop(end+.05)})});
+      freqs.forEach(function(f){var o=ctx.createOscillator();o.setPeriodicWave(WS);o.frequency.value=f;o.detune.value=(Math.random()-.5)*8;o.connect(lp);o.start(t);o.stop(end+.05)});
     }
     // 事件表
     var LH=[],ML=[],bars=[];
@@ -445,7 +450,7 @@ var BGMEngine=(function(){
     this.run=function(until){
       while(this.nextT<until){
         var s=this.step,t=this.nextT,bar=Math.floor(s/per),ep=s%per;
-        if(ep===0){var ch=bars[bar];pad([ch[0]/2<60?ch[0]:ch[0],ch[1],ch[2]],t,per*eighth)}
+        if(ep===0){var ch=bars[bar];pad([ch[0],ch[1],ch[2]],t,per*eighth)}
         if(LH[s]){piano(LH[s][0],t+jit(),eighth*2,LH[s][1]*(.92+Math.random()*.16))}
         if(ML[s])ML[s].forEach(function(n){
           var f=n[0],v=n[2]*(.92+Math.random()*.16);
@@ -471,7 +476,7 @@ function sndUI(){
 }
 function bgmReal(){
   BG.starting=false;if(BG.on)return;
-  var m=actx.createGain();m.gain.setValueAtTime(0,actx.currentTime);m.gain.linearRampToValueAtTime(.5,actx.currentTime+3);
+  var m=actx.createGain();m.gain.setValueAtTime(0,actx.currentTime);m.gain.linearRampToValueAtTime(.4,actx.currentTime+3);
   var cp=actx.createDynamicsCompressor();m.connect(cp);cp.connect(actx.destination);
   var p=new BGMEngine.Player(actx,m,SEASON);p.reset(actx.currentTime+.3);
   BG.p=p;BG.m=m;BG.cp=cp;BG.on=true;
