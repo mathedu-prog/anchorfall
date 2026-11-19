@@ -328,6 +328,14 @@ function draw() {
 }
 var tipGone = false;
 function hideTip() { tipGone = true; $('tip').style.opacity = 0; }
+function near(x, y) {   // 沒點中方塊時，抓離手指最近（約 0.9 格內）的方塊，細小方塊也好拖
+  var best = -1, bd = scale() * .9;
+  polys.forEach(function (q) {
+    var cx = (q.pts[0][0] + q.pts[2][0]) / 2, cy = (q.pts[0][1] + q.pts[2][1]) / 2, d = Math.hypot(cx - x, cy - y);
+    if (d < bd) { bd = d; best = q.pi; }
+  });
+  return best;
+}
 function hit(x, y) {
   for (var i = polys.length - 1; i >= 0; i--) {
     var pts = polys[i].pts, inside = false;
@@ -362,7 +370,8 @@ cv.addEventListener('pointerdown', function (e) {
   }
   last = p; moved = false; dragged = false; ax = az = 0; hideTip();
   downPi = hit(p[0], p[1]);
-  if (downPi >= 0) { sel = downPi; mode = 'piece'; held = true; dirty = true; } else { mode = 'view'; }
+  if (downPi < 0) downPi = near(p[0], p[1]);
+  if (downPi >= 0) { sel = downPi; mode = 'piece'; held = true; ax = P[sel].ox; az = P[sel].oz; dirty = true; } else { mode = 'view'; }
 });
 cv.addEventListener('pointermove', function (e) {
   if (!ptr[e.pointerId]) return;
@@ -380,9 +389,20 @@ cv.addEventListener('pointermove', function (e) {
     var S = scale(), c = Math.cos(yaw), s = Math.sin(yaw), sp = Math.sin(pitch);
     var a2 = dx / S, b2 = dy / (S * sp);
     ax += a2 * c - b2 * s; az += a2 * s + b2 * c;
-    var guard = 0;
-    while (Math.abs(ax) >= 1 && guard++ < 6) { var sx = ax > 0 ? 1 : -1; if (step(sx, 0)) { ax -= sx; dragged = true; } else { ax = 0; break; } }
-    while (Math.abs(az) >= 1 && guard++ < 12) { var sz = az > 0 ? 1 : -1; if (step(0, sz)) { az -= sz; dragged = true; } else { az = 0; break; } }
+    var pc = P[sel], guard = 0, rx, rz;
+    while (guard++ < 12) {
+      rx = Math.round(ax); rz = Math.round(az);
+      if (rx === pc.ox && rz === pc.oz) break;
+      var dxs = rx === pc.ox ? 0 : (rx > pc.ox ? 1 : -1), dzs = rz === pc.oz ? 0 : (rz > pc.oz ? 1 : -1), ok = false;
+      // 先走差距較大的軸；被擋住時改走另一軸（沿著牆滑動）
+      var fx = Math.abs(ax - pc.ox) >= Math.abs(az - pc.oz);
+      if (fx) { if (dxs) ok = step(dxs, 0); if (!ok && dzs) ok = step(0, dzs); }
+      else { if (dzs) ok = step(0, dzs); if (!ok && dxs) ok = step(dxs, 0); }
+      if (!ok) break;
+      dragged = true;
+    }
+    // 被擋住時不讓手指目標跑太遠，反向移動才會立刻回應
+    ax = pc.ox + Math.max(-.6, Math.min(.6, ax - pc.ox)); az = pc.oz + Math.max(-.6, Math.min(.6, az - pc.oz));
   }
 });
 function up(e) {
