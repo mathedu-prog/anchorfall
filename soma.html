@@ -434,32 +434,32 @@ function resize() {
 }
 
 /* ---------- 指標操作 ---------- */
-var ptr = {}, mode = null, last = null, ax = 0, az = 0, moved = false, pinch0 = 0, zoom0 = 1, downPi = -1, dragged = false;
+var ptr = {}, pm = null, last = null, ax = 0, az = 0, moved = false, pinch0 = 0, zoom0 = 1, downPi = -1, dragged = false;
 function pos(e) { return [e.clientX, e.clientY]; }
 cv.addEventListener('pointerdown', function (e) {
   cv.setPointerCapture(e.pointerId); var p = pos(e); ptr[e.pointerId] = p;
   var ids = Object.keys(ptr);
   if (ids.length === 2) {
-    var a = ptr[ids[0]], b = ptr[ids[1]]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1; zoom0 = zoom; mode = 'pinch'; held = false; return;
+    var a = ptr[ids[0]], b = ptr[ids[1]]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1; zoom0 = zoom; pm = 'pinch'; held = false; return;
   }
   last = p; moved = false; dragged = false; ax = az = 0; hideTip();
   downPi = hit(p[0], p[1]);
   if (downPi < 0) downPi = near(p[0], p[1]);
-  if (downPi >= 0) { sel = downPi; mode = 'piece'; held = true; ax = P[sel].ox; az = P[sel].oz; dirty = true; } else { mode = 'view'; }
+  if (downPi >= 0) { sel = downPi; pm = 'piece'; held = true; ax = P[sel].ox; az = P[sel].oz; dirty = true; } else { pm = 'view'; }
 });
 cv.addEventListener('pointermove', function (e) {
   if (!ptr[e.pointerId]) return;
   var p = pos(e); ptr[e.pointerId] = p;
-  if (mode === 'pinch') {
+  if (pm === 'pinch') {
     var ids = Object.keys(ptr); if (ids.length < 2) return;
     var a = ptr[ids[0]], b = ptr[ids[1]], d = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1;
     zoom = Math.max(.55, Math.min(2.6, zoom0 * d / pinch0)); dirty = true; return;
   }
   var dx = p[0] - last[0], dy = p[1] - last[1]; last = p;
   if (Math.hypot(dx, dy) > 0.5) moved = true;
-  if (mode === 'view') {
+  if (pm === 'view') {
     yaw += dx * 0.009; pitch = Math.max(.2, Math.min(1.42, pitch + dy * 0.006)); dirty = true;
-  } else if (mode === 'piece') {
+  } else if (pm === 'piece') {
     var S = scale(), c = Math.cos(yaw), s = Math.sin(yaw), sp = Math.sin(pitch);
     var a2 = dx / S, b2 = dy / (S * sp);
     ax += a2 * c - b2 * s; az += a2 * s + b2 * c;
@@ -482,7 +482,7 @@ cv.addEventListener('pointermove', function (e) {
 function up(e) {
   if (!ptr[e.pointerId]) return;
   delete ptr[e.pointerId];
-  if (mode === 'piece') {
+  if (pm === 'piece') {
     held = false;
     if (sel >= 0) {
       var n = gravity ? drop(sel) : 0;
@@ -492,8 +492,8 @@ function up(e) {
       }
     }
     save(); dirty = true;
-  } else if (mode === 'view' && !moved) { sel = -1; dirty = true; }
-  if (Object.keys(ptr).length === 0) mode = null; else if (mode === 'pinch') mode = null;
+  } else if (pm === 'view' && !moved) { sel = -1; dirty = true; }
+  if (Object.keys(ptr).length === 0) pm = null; else if (pm === 'pinch') pm = null;
 }
 cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
 cv.addEventListener('wheel', function (e) { e.preventDefault(); zoom = Math.max(.55, Math.min(2.6, zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08))); dirty = true; }, { passive: false });
@@ -798,6 +798,6 @@ function celebrate(f) {
 
 load(); setSnd(); resize(); requestAnimationFrame(loop);
 setTimeout(function () { var c = $('cen'); $('cenImg').src = F11; c.classList.add('on'); setTimeout(function () { c.classList.remove('on'); }, 4800); }, 800);
-window.__soma = { startChal: startChal, chal: function () { return chal; }, REC: REC, DEF: DEF, PROPER: PROPER, SOLS: SOLS, openSheet: openSheet, set: function (arr) { arr.forEach(function (q, i) { P[i].cells = q.cells; P[i].ox = q.ox; P[i].oy = q.oy; P[i].oz = q.oz; }); dirty = true; save(); }, P: function () { return P; }, sel: function (i) { sel = i; dirty = true; }, rotate: rotate, step: step, drop: drop, lift: lift, valid: allValid, proj: proj, draw: draw };
+window.__soma = { mode: function () { return mode; }, startChal: startChal, chal: function () { return chal; }, REC: REC, DEF: DEF, PROPER: PROPER, SOLS: SOLS, openSheet: openSheet, set: function (arr) { arr.forEach(function (q, i) { P[i].cells = q.cells; P[i].ox = q.ox; P[i].oy = q.oy; P[i].oz = q.oz; }); dirty = true; save(); }, P: function () { return P; }, sel: function (i) { sel = i; dirty = true; }, rotate: rotate, step: step, drop: drop, lift: lift, valid: allValid, proj: proj, draw: draw };
 })();
 </script>
