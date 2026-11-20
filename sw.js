@@ -1,5 +1,5 @@
 /* 錨界 Service Worker：預先快取全部頁面，離線可玩；平常「先用快取、背景更新」。改版時把 VER 加一。 */
-var VER = 'anchorfall-v2';
+var VER = 'anchorfall-v3';
 var FILES = ['./', './index.html', './boat.html', './sky.html', './jiugong.html', './soma.html', './install.html',
   './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', function (e) {

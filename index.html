@@ -132,6 +132,8 @@ label.l{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 #intro .skip{right:max(12px,env(safe-area-inset-right,0px))}
 #intro .snd{left:max(12px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:4px}
 #intro .snd svg{width:16px;height:16px}
+.inst{display:inline-flex;align-items:center;gap:6px;margin:10px 0 2px;padding:8px 14px;min-height:40px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:13px;text-decoration:none}
+.inst svg{width:16px;height:16px}.inst[hidden]{display:none}
 .bgmbtn{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:5px;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;font-size:12px;padding:8px 13px;min-height:40px;box-shadow:0 4px 16px rgba(0,0,0,.14);cursor:pointer}
 .bgmbtn[hidden]{display:none}.bgmbtn svg{width:17px;height:17px}.bgmbtn[aria-pressed="true"]{color:var(--accent,currentColor)}
 .bgmbtn[aria-pressed="true"] svg{animation:bgmpulse 2.6s ease-in-out infinite}@keyframes bgmpulse{50%{transform:scale(1.14)}}
@@ -206,6 +208,7 @@ html[data-season=spring] .sc-spring,html[data-season=summer] .sc-summer,html[dat
     <div class="days" id="days"></div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <label class="opt"><input type="checkbox" id="introOn"> 每天第一次打開時播放開場動畫<button type="button" id="introReplay">重播一次</button></label>
+    <a class="inst" id="instLink" href="./install.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M12 8v6M9.5 11.8 12 14.3l2.5-2.5"/></svg>安裝到手機</a>
     <details class="how"><summary>怎麼點亮？</summary><p class="note">遊戲完成當天的題目後，按完成畫面上的「回入口」，這裡就會自動點亮。紀錄只存在這個瀏覽器，也可以手動勾選或取消。</p></details>
   </section>
 </div>
@@ -635,6 +638,7 @@ renderToday();renderSeason();renderCards();renderLamps();
 if(!IS.off&&IS.last!==today&&!returning)playIntro();
 else if(returning&&IS.last!==today){IS.seen=true;IS.last=today;isave()}
 applyHash();
+try{if(matchMedia("(display-mode: standalone)").matches||navigator.standalone)$("instLink").hidden=true}catch(e){}
 $("bgmbtn").hidden=false;sndUI();bgmSync();if(IS.snd)setTimeout(function(){bgmRender(function(){bgmSync()})},400);
 })();
 </script>
